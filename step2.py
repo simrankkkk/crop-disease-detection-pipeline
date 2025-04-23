@@ -1,13 +1,11 @@
 # clearml_requirements: torchvision, numpy, pillow, matplotlib
-
 from clearml import Task, Dataset
 import os
 from torchvision import datasets, transforms
 
-# ✅ Start ClearML task
 task = Task.init(
     project_name="plantdataset",
-    task_name="Step 2 - Data Preprocessing (No Torch)"
+    task_name="Step 2 - Data Preprocessing (No Torch Clean)"  # ✅ new name!
 )
 
 # ✅ Load dataset from ClearML
