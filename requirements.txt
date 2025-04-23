@@ -1,8 +1,11 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-
+numpy
+pandas
+matplotlib
+scikit-learn
+opencv-python
+Pillow
+tqdm
+pyyaml
 torch==2.0.1+cpu
 torchvision==0.15.2+cpu
-timm
-clearml
-numpy
-matplotlib
+--extra-index-url https://download.pytorch.org/whl/cpu
