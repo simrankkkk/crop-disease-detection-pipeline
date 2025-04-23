@@ -1,6 +1,9 @@
+# Clean PyTorch CPU-compatible requirements (use direct links)
+
 --extra-index-url https://download.pytorch.org/whl/cpu
 
 torch==2.0.1+cpu
 torchvision==0.15.2+cpu
-timm
-clearml
+numpy
+pillow
+matplotlib
