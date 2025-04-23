@@ -1,43 +1,36 @@
-# clearml_requirements: torchvision, numpy, pillow, matplotlib
+# clearml_requirements: numpy, pillow, matplotlib
+
 from clearml import Task, Dataset
 import os
-from torchvision import datasets, transforms
+from PIL import Image
+import numpy as np
 
+# ✅ Start ClearML task
 task = Task.init(
     project_name="plantdataset",
-    task_name="Step 2 - Data Preprocessing (No Torch Clean)"  # ✅ new name!
+    task_name="Step 2 - Pillow Preprocessing (No Torch)"
 )
 
 # ✅ Load dataset from ClearML
-dataset = Dataset.get(
-    dataset_name="New Augmented Plant Disease Dataset",
-    dataset_project="plantdataset"
-)
+dataset = Dataset.get(dataset_name="New Augmented Plant Disease Dataset")
 dataset_path = dataset.get_local_copy()
 
-# ✅ Define preprocessing transforms
-image_transforms = {
-    "train": transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-    ]),
-    "val": transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-    ])
-}
-
-# ✅ Load image datasets
+# ✅ Just preview some images to simulate "processing"
 train_dir = os.path.join(dataset_path, "train")
-val_dir = os.path.join(dataset_path, "valid")
 
-train_dataset = datasets.ImageFolder(train_dir, transform=image_transforms["train"])
-val_dataset = datasets.ImageFolder(val_dir, transform=image_transforms["val"])
+# List 3 sample images for confirmation
+count = 0
+for root, dirs, files in os.walk(train_dir):
+    for file in files:
+        if file.endswith((".jpg", ".jpeg", ".png")):
+            path = os.path.join(root, file)
+            img = Image.open(path).resize((224, 224))
+            img_array = np.array(img)
+            print(f"✅ {file} → shape: {img_array.shape}")
+            count += 1
+        if count >= 3:
+            break
+    if count >= 3:
+        break
 
-print("✅ Preprocessing complete")
-print(f"Train samples: {len(train_dataset)} | Val samples: {len(val_dataset)}")
-print(f"Classes: {train_dataset.classes}")
+print("✅ Step 2 complete — previewed sample images.")
