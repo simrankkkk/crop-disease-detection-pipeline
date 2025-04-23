@@ -1,12 +1,11 @@
 from clearml import Task, Dataset
 import os
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
 
 # ✅ Start ClearML task
 task = Task.init(
     project_name="plantdataset",
-    task_name="Step 2 - Data Preprocessing (AIS_Personal Logic)"
+    task_name="Step 2 - Data Preprocessing (No Torch)"
 )
 
 # ✅ Load dataset from ClearML
@@ -16,14 +15,14 @@ dataset = Dataset.get(
 )
 dataset_path = dataset.get_local_copy()
 
-# ✅ Define RGB image preprocessing transforms
+# ✅ Define preprocessing transforms
 image_transforms = {
     "train": transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # For RGB images
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ]),
     "val": transforms.Compose([
         transforms.Resize((224, 224)),
@@ -32,16 +31,12 @@ image_transforms = {
     ])
 }
 
-# ✅ Load train/val image folders
+# ✅ Load image datasets
 train_dir = os.path.join(dataset_path, "train")
 val_dir = os.path.join(dataset_path, "valid")
 
 train_dataset = datasets.ImageFolder(train_dir, transform=image_transforms["train"])
 val_dataset = datasets.ImageFolder(val_dir, transform=image_transforms["val"])
-
-# ✅ Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32)
 
 print("✅ Preprocessing complete")
 print(f"Train samples: {len(train_dataset)} | Val samples: {len(val_dataset)}")
