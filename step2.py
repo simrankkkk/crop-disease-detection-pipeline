@@ -1,3 +1,5 @@
+# clearml_requirements: torchvision, numpy, pillow, matplotlib
+
 from clearml import Task, Dataset
 import os
 from torchvision import datasets, transforms
