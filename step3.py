@@ -1,72 +1,67 @@
-task = Task.init(project_name="PlantPipeline", task_name="step 3: Train Model")
-
-# step3_train_model.py
+from clearml import Task
 import os
-from clearml import Task, Dataset, Model
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, GlobalAveragePooling2D, Dense, Dropout, Concatenate
+from tensorflow.keras.applications import MobileNetV2, DenseNet121
+import pickle
 
-if __name__ == '__main__':
-    task = Task.init(
-        project_name='PlantPipeline',
-        task_name='Step3-TrainModel',
-        task_type=Task.TaskTypes.training
-    )
+def step3():
+    task = Task.init(project_name="PlantPipeline", task_name="step3 - Hybrid CNN Model Training")
 
-    # 1) Get processed images folder (from previous step)
-    processed_folder = task.get_output('Step2-PreprocessData')
-    if not processed_folder:
-        # if running standalone, fetch from artifact
-        processed_folder = task.artifacts['preprocessed_data'].get_local_copy()
+    # Load preprocessed data
+    preprocessed_dir = "preprocessed"
+    X_train = np.load(os.path.join(preprocessed_dir, "X_train.npy"))
+    X_val   = np.load(os.path.join(preprocessed_dir, "X_val.npy"))
+    y_train = np.load(os.path.join(preprocessed_dir, "y_train.npy"))
+    y_val   = np.load(os.path.join(preprocessed_dir, "y_val.npy"))
 
-    # 2) Build your generators
-    from tensorflow.keras.preprocessing.image import ImageDataGenerator
-    from tensorflow.keras.applications import MobileNetV2, DenseNet121
-    from tensorflow.keras import layers, Input
-    from tensorflow.keras.models import Model
+    # Load label encoder to get number of classes
+    with open(os.path.join(preprocessed_dir, "label_encoder.pkl"), "rb") as f:
+        encoder = pickle.load(f)
 
-    IMG_SIZE = (160,160)
-    BATCH    = 32
-    datagen  = ImageDataGenerator()
+    num_classes = len(encoder.classes_)
 
-    train_gen = datagen.flow_from_directory(
-        os.path.join(processed_folder, 'train'),
-        target_size=IMG_SIZE,
-        batch_size=BATCH,
-        class_mode='categorical'
-    )
-    valid_gen = datagen.flow_from_directory(
-        os.path.join(processed_folder, 'valid'),
-        target_size=IMG_SIZE,
-        batch_size=BATCH,
-        class_mode='categorical'
-    )
+    # Build hybrid model: MobileNetV2 + DenseNet121
+    input_tensor = Input(shape=(128, 128, 3))
 
-    # 3) Build the hybrid model
-    input_layer = Input(shape=(160,160,3))
-    mobi_base = MobileNetV2(include_top=False, weights='imagenet', input_tensor=input_layer)
-    dnet_base = DenseNet121(include_top=False, weights='imagenet', input_tensor=input_layer)
-    for l in dnet_base.layers: l.trainable = False
+    base_mobilenet = MobileNetV2(include_top=False, weights='imagenet', input_tensor=input_tensor)
+    base_densenet  = DenseNet121(include_top=False, weights='imagenet', input_tensor=input_tensor)
 
-    x1 = layers.GlobalAveragePooling2D()(mobi_base.output)
-    x2 = layers.GlobalAveragePooling2D()(dnet_base.output)
-    x  = layers.Concatenate()([x1, x2])
-    x  = layers.Dense(256, activation='relu')(x)
-    x  = layers.Dropout(0.4)(x)
-    out= layers.Dense(train_gen.num_classes, activation='softmax')(x)
+    # Freeze base models
+    for layer in base_mobilenet.layers:
+        layer.trainable = False
+    for layer in base_densenet.layers:
+        layer.trainable = False
 
-    model = Model(inputs=input_layer, outputs=out)
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    # Combine outputs
+    out_mobilenet = GlobalAveragePooling2D()(base_mobilenet.output)
+    out_densenet  = GlobalAveragePooling2D()(base_densenet.output)
+    merged        = Concatenate()([out_mobilenet, out_densenet])
 
-    # 4) Train
-    history = model.fit(train_gen, validation_data=valid_gen, epochs=10)
+    # Classification head
+    x = Dense(512, activation='relu')(merged)
+    x = Dropout(0.4)(x)
+    output = Dense(num_classes, activation='softmax')(x)
 
-    # 5) Save & upload
-    os.makedirs('myModel', exist_ok=True)
-    model_path = os.path.join('myModel','hybrid_model.h5')
+    model = Model(inputs=input_tensor, outputs=output)
+
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+    # Train model
+    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, batch_size=32)
+
+    # Save model
+    os.makedirs("model", exist_ok=True)
+    model_path = os.path.join("model", "hybrid_model.h5")
     model.save(model_path)
-    Model.upload(
-        model_path=model_path,
-        model_name='Hybrid-MobileNetV2-DenseNet121',
-        model_project='PlantPipeline'
-    )
-    print(f"✅ Model trained & uploaded: {model_path}")
+
+    # Upload model artifact
+    task.upload_artifact("hybrid_model", model_path)
+    print("✅ Hybrid model training complete. Saved to:", model_path)
+
     return model_path
+
+if __name__ == "__main__":
+    step3()
