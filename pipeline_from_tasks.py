@@ -1,48 +1,39 @@
-from clearml.automation.controller import PipelineDecorator, PipelineController
+# pipeline_from_tasks.py
+from clearml import Task, PipelineDecorator
 
-# ─────────────────────────────
-# STEP 1: Fetch dataset
-# ─────────────────────────────
-@PipelineDecorator.component(name="step1_fetch_dataset")
-def step1():
-    from clearml import Dataset
-    dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
-    path = dataset.get_local_copy()
-    print("✅ Dataset fetched at:", path)
-    return path
-
-# ─────────────────────────────
-# STEP 2: Preprocessing
-# ─────────────────────────────
-@PipelineDecorator.component(name="step2_preprocess_data")
-def step2(dataset_path: str):
-    import step2  # runs step2.py script logic
-    return step2.step2()  # must return path to preprocessed folder
-
-# ─────────────────────────────
-# STEP 3: Train hybrid CNN model
-# ─────────────────────────────
-@PipelineDecorator.component(name="step3_train_model")
-def step3(preprocessed_path: str):
-    import step3  # runs step3.py script logic
-    return step3.step3()  # must return path to trained model
-
-# ─────────────────────────────
-# Main pipeline controller
-# ─────────────────────────────
-if __name__ == "__main__":
-    pipe = PipelineDecorator.run_locally(
-        name="PlantPipeline",
-        project="PlantPipeline",
-        version="1.0",
-        queue="default"  # or your ClearML agent queue name
+@PipelineDecorator.pipeline(
+    name="Plant Disease Detection Pipeline",
+    project="PlantPipeline",
+    version="1.0"
+)
+def run_pipeline():
+    # Step 1: Load dataset from ClearML
+    step1 = PipelineDecorator.add_function_step(
+        name="upload_dataset",
+        function="step1.py",
+        function_kwargs={},
+        task_type=Task.TaskTypes.data_processing,
+        task_name="Step 1 - Load Dataset"
     )
 
-    pipe.set_default_execution_queue("default")
+    # Step 2: Preprocess images
+    step2 = PipelineDecorator.add_function_step(
+        name="preprocess_data",
+        function="step2.py",
+        function_kwargs={"input_path": step1},  # Will pass dataset path from Step 1
+        task_type=Task.TaskTypes.data_processing,
+        task_name="Step 2 - Preprocess Data"
+    )
 
-    # Chain steps
-    step1_output = step1()
-    step2_output = step2(dataset_path=step1_output)
-    step3_output = step3(preprocessed_path=step2_output)
+    # Step 3: Train the hybrid model
+    step3 = PipelineDecorator.add_function_step(
+        name="train_model",
+        function="step3.py",
+        function_kwargs={"dataset_path": step2},
+        task_type=Task.TaskTypes.training,
+        task_name="Step 3 - Train Hybrid Model"
+    )
 
-    print("✅ Pipeline completed. Model saved at:", step3_output)
+if __name__ == "__main__":
+    PipelineDecorator.run_locally()
+    run_pipeline()
