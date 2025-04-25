@@ -1,56 +1,81 @@
-task = Task.init(project_name="PlantPipeline", task_name="step 2: Preprocess Data")
-# step2_data_preprocessing.py
-import os, shutil
-from clearml import Task, Dataset
+# step2.py — Data preprocessing with rescaling, label encoding, and ClearML logging
 
-if __name__ == '__main__':
-    task = Task.init(
-        project_name='PlantPipeline',
-        task_name='Step2-PreprocessData',
-        task_type=Task.TaskTypes.data_processing
-    )
+from clearml import Task
+import os
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from PIL import Image
+import pickle
 
-    # Get dataset_id passed in via pipeline (or hard-code for manual run)
-    dataset_id = task.get_parameter('dataset_id', default='105163c10d0a4bbaa06055807084ec71')
+# ✅ Initialize ClearML Task
+task = Task.init(project_name="PlantPipeline", task_name="step2 - Data Preprocessing")
 
-    # 1) Pull raw images
-    ds = Dataset.get(dataset_id=dataset_id)
-    raw_dir = ds.get_local_copy()
-    print(f"Raw data directory: {raw_dir}")
+# ✅ Dataset already uploaded to ClearML, we retrieve it
+from clearml import Dataset
+dataset_path = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71").get_local_copy()
 
-    # 2) Preprocess exactly as in your ais_personal notebook
-    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# ✅ Class labels
+classes = [
+    "Apple___Apple_scab", "Apple___Black_rot", "Apple___Cedar_apple_rust", "Apple___healthy",
+    "Blueberry___healthy", "Cherry_(including_sour)___Powdery_mildew", "Cherry_(including_sour)___healthy",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot", "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___Northern_Leaf_Blight", "Corn_(maize)___healthy", "Grape___Black_rot",
+    "Grape___Esca_(Black_Measles)", "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)", "Grape___healthy",
+    "Orange___Haunglongbing_(Citrus_greening)", "Peach___Bacterial_spot", "Peach___healthy",
+    "Pepper,_bell___Bacterial_spot", "Pepper,_bell___healthy", "Potato___Early_blight",
+    "Potato___Late_blight", "Potato___healthy", "Raspberry___healthy", "Soybean___healthy",
+    "Squash___Powdery_mildew", "Strawberry___Leaf_scorch", "Strawberry___healthy",
+    "Tomato___Bacterial_spot", "Tomato___Early_blight", "Tomato___Late_blight", "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot", "Tomato___Spider_mites Two-spotted_spider_mite", "Tomato___Target_Spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus", "Tomato___Tomato_mosaic_virus", "Tomato___healthy"
+]
 
-    IMG_SIZE = (160,160)
-    BATCH    = 32
-    datagen  = ImageDataGenerator(rescale=1./255)
+# ✅ Process images and labels
+all_images = []
+all_labels = []
 
-    # ensure output folder is clean
-    processed_dir = os.path.abspath('preprocessed')
-    shutil.rmtree(processed_dir, ignore_errors=True)
-    os.makedirs(processed_dir, exist_ok=True)
+image_dir = os.path.join(dataset_path, "New Plant Diseases Dataset(Augmented)")
 
-    # generate one batch to materialize files
-    datagen.flow_from_directory(
-        raw_dir,
-        target_size=IMG_SIZE,
-        batch_size=BATCH,
-        class_mode='categorical',
-        save_to_dir=processed_dir,
-        save_format='png'
-    ).next()
+for label in classes:
+    class_path = os.path.join(image_dir, label)
+    if not os.path.isdir(class_path):
+        continue
+    for img_name in os.listdir(class_path):
+        img_path = os.path.join(class_path, img_name)
+        try:
+            img = Image.open(img_path).convert("RGB").resize((128, 128))
+            img_arr = np.array(img) / 255.0  # ✅ Normalize to [0,1]
+            all_images.append(img_arr)
+            all_labels.append(label)
+        except:
+            continue
 
-    # 3) (Optional) log this processed folder as a new Dataset
-    # pre_ds = Dataset.create(
-    #     dataset_name='PlantDiseasePreprocessed',
-    #     dataset_project='PlantPipeline',
-    # )
-    # pre_ds.add_files(processed_dir)
-    # pre_ds.upload()
-    # pre_ds.finalize()
-    # print(f"↑ Preprocessed dataset version: {pre_ds.id}")
+# ✅ Encode labels
+encoder = LabelEncoder()
+labels_encoded = encoder.fit_transform(all_labels)
 
-    task.upload_artifact('preprocessed_data', processed_dir)
-    print(f"✅ Preprocessed data logged from: {processed_dir}")
+# ✅ Train-test split
+X_train, X_val, y_train, y_val = train_test_split(
+    np.array(all_images), np.array(labels_encoded), test_size=0.2, random_state=42, stratify=labels_encoded
+)
 
-    return processed_dir
+# ✅ Save preprocessed data
+output_dir = "preprocessed"
+os.makedirs(output_dir, exist_ok=True)
+
+np.save(os.path.join(output_dir, "X_train.npy"), X_train)
+np.save(os.path.join(output_dir, "X_val.npy"), X_val)
+np.save(os.path.join(output_dir, "y_train.npy"), y_train)
+np.save(os.path.join(output_dir, "y_val.npy"), y_val)
+
+with open(os.path.join(output_dir, "label_encoder.pkl"), "wb") as f:
+    pickle.dump(encoder, f)
+
+print("✅ Preprocessing complete and data saved to:", output_dir)
+
+# ✅ Log output dir to ClearML
+task.upload_artifact("preprocessed", artifact_object=output_dir)
+
+# ✅ Return path for next step
+return output_dir
