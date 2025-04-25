@@ -1,105 +1,70 @@
-# clearml_requirements: torch==2.0.1+cpu, torchvision==0.15.2+cpu, timm, numpy, matplotlib, clearml
-# --extra-index-url https://download.pytorch.org/whl/cpu
-
-from clearml import Task, Dataset
+# step3_train_model.py
 import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms, models
-from torch.utils.data import DataLoader
+from clearml import Task, Dataset, Model
 
-# ✅ ClearML Task Init
-task = Task.init(
-    project_name="plantdataset",
-    task_name="Step 3 - Hybrid Model Training (AIS-Personal)"
-)
+if __name__ == '__main__':
+    task = Task.init(
+        project_name='PlantPipeline',
+        task_name='Step3-TrainModel',
+        task_type=Task.TaskTypes.training
+    )
 
-# ✅ Load dataset from ClearML
-dataset = Dataset.get(dataset_name="New Augmented Plant Disease Dataset")
-dataset_path = dataset.get_local_copy()
+    # 1) Get processed images folder (from previous step)
+    processed_folder = task.get_output('Step2-PreprocessData')
+    if not processed_folder:
+        # if running standalone, fetch from artifact
+        processed_folder = task.artifacts['preprocessed_data'].get_local_copy()
 
-# ✅ Paths
-train_dir = os.path.join(dataset_path, "train")
-val_dir = os.path.join(dataset_path, "valid")
+    # 2) Build your generators
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+    from tensorflow.keras.applications import MobileNetV2, DenseNet121
+    from tensorflow.keras import layers, Input
+    from tensorflow.keras.models import Model
 
-# ✅ Transform (same as AIS-Personal)
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
+    IMG_SIZE = (160,160)
+    BATCH    = 32
+    datagen  = ImageDataGenerator()
 
-train_data = datasets.ImageFolder(train_dir, transform=transform)
-val_data = datasets.ImageFolder(val_dir, transform=transform)
+    train_gen = datagen.flow_from_directory(
+        os.path.join(processed_folder, 'train'),
+        target_size=IMG_SIZE,
+        batch_size=BATCH,
+        class_mode='categorical'
+    )
+    valid_gen = datagen.flow_from_directory(
+        os.path.join(processed_folder, 'valid'),
+        target_size=IMG_SIZE,
+        batch_size=BATCH,
+        class_mode='categorical'
+    )
 
-train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_data, batch_size=32, shuffle=False)
+    # 3) Build the hybrid model
+    input_layer = Input(shape=(160,160,3))
+    mobi_base = MobileNetV2(include_top=False, weights='imagenet', input_tensor=input_layer)
+    dnet_base = DenseNet121(include_top=False, weights='imagenet', input_tensor=input_layer)
+    for l in dnet_base.layers: l.trainable = False
 
-# ✅ Load Pretrained Models
-device = torch.device("cpu")
+    x1 = layers.GlobalAveragePooling2D()(mobi_base.output)
+    x2 = layers.GlobalAveragePooling2D()(dnet_base.output)
+    x  = layers.Concatenate()([x1, x2])
+    x  = layers.Dense(256, activation='relu')(x)
+    x  = layers.Dropout(0.4)(x)
+    out= layers.Dense(train_gen.num_classes, activation='softmax')(x)
 
-mobilenet = models.mobilenet_v2(pretrained=True).features.to(device)
-densenet = models.densenet121(pretrained=True).features.to(device)
+    model = Model(inputs=input_layer, outputs=out)
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-mobilenet.eval()
-densenet.eval()
+    # 4) Train
+    history = model.fit(train_gen, validation_data=valid_gen, epochs=10)
 
-# ✅ Hybrid Classifier Head
-class HybridNet(nn.Module):
-    def __init__(self, num_classes):
-        super(HybridNet, self).__init__()
-        self.mobilenet = mobilenet
-        self.densenet = densenet
-        self.pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.flatten = nn.Flatten()
-        self.classifier = nn.Sequential(
-            nn.Linear(1280 + 1024, 512),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
-        )
-
-    def forward(self, x):
-        with torch.no_grad():
-            x1 = self.mobilenet(x)
-            x1 = self.pool(x1)
-            x1 = self.flatten(x1)
-
-            x2 = self.densenet(x)
-            x2 = self.pool(x2)
-            x2 = self.flatten(x2)
-
-        x_cat = torch.cat((x1, x2), dim=1)
-        return self.classifier(x_cat)
-
-model = HybridNet(num_classes=len(train_data.classes)).to(device)
-
-# ✅ Loss and Optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.classifier.parameters(), lr=0.001)
-
-# ✅ Train
-epochs = 2  # (use more in real run)
-for epoch in range(epochs):
-    model.train()
-    total_loss = 0
-    correct = 0
-
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
-
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-        _, preds = torch.max(outputs, 1)
-        correct += torch.sum(preds == labels).item()
-
-    accuracy = correct / len(train_data)
-    print(f"Epoch {epoch+1}: Loss={total_loss:.4f}, Accuracy={accuracy:.4f}")
-
-print("✅ Training Complete")
+    # 5) Save & upload
+    os.makedirs('myModel', exist_ok=True)
+    model_path = os.path.join('myModel','hybrid_model.h5')
+    model.save(model_path)
+    Model.upload(
+        model_path=model_path,
+        model_name='Hybrid-MobileNetV2-DenseNet121',
+        model_project='PlantPipeline'
+    )
+    print(f"✅ Model trained & uploaded: {model_path}")
+    return model_path
