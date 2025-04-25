@@ -1,3 +1,5 @@
+task = Task.init(project_name="PlantPipeline", task_name="step 3: Train Model")
+
 # step3_train_model.py
 import os
 from clearml import Task, Dataset, Model
