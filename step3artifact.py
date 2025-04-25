@@ -10,7 +10,6 @@ from pathlib import Path
 
 # 🚀 ClearML task
 task = Task.init(project_name="PlantPipeline", task_name="step3 - hybrid model training")
-task.connect_configuration()  # optional but good for config tracking
 
 # 🧠 Load Step 2 artifact (zip containing preprocessed train/valid images)
 step2_task = Task.get_task(task_id="32475789c3c24b8c9d4966ceefef130a")  # ✅ Replace with your Step 2 Task ID
