@@ -1,70 +1,63 @@
 from clearml import Task
 import os
+import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
-from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout, Concatenate, Input
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Concatenate, Input
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
 
-# 🚀 Connect to ClearML Task
-task = Task.init(project_name="PlantPipeline", task_name="step3 - hybrid model training", task_type="training")
+# ✅ Connect to ClearML
+task = Task.init(project_name="PlantPipeline", task_name="step3 - Train Hybrid Model")
+step2_task = Task.get_task(task_id="32475789c3c24b8c9d4966ceefe1f30a")  # ✅ Replace with actual Step 2 task ID
 
-# 🔗 Fetch the artifact uploaded by step2
-step2_task = Task.get_task(project_name="PlantPipeline", task_name="step2 - preprocessing")
+# ✅ Load preprocessed dataset artifact from Step 2
 dataset_path = step2_task.artifacts["preprocessed_dataset"].get_local_copy()
-
 train_dir = os.path.join(dataset_path, "train")
-val_dir = os.path.join(dataset_path, "valid")
+valid_dir = os.path.join(dataset_path, "valid")
 
-# ✅ Image generators (rescaling done here)
-IMG_SIZE = (224, 224)
-BATCH_SIZE = 32
+# ✅ Image parameters
+img_size = (224, 224)
+batch_size = 32
 
-train_gen = ImageDataGenerator(rescale=1.0 / 255).flow_from_directory(
-    train_dir,
-    target_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    class_mode="categorical"
+# ✅ Data generators
+train_datagen = ImageDataGenerator(rescale=1./255)
+valid_datagen = ImageDataGenerator(rescale=1./255)
+
+train_gen = train_datagen.flow_from_directory(
+    train_dir, target_size=img_size, batch_size=batch_size, class_mode='categorical'
 )
 
-val_gen = ImageDataGenerator(rescale=1.0 / 255).flow_from_directory(
-    val_dir,
-    target_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    class_mode="categorical"
+valid_gen = valid_datagen.flow_from_directory(
+    valid_dir, target_size=img_size, batch_size=batch_size, class_mode='categorical'
 )
 
-# ✅ Build hybrid model
+# ✅ Define hybrid model
 input_tensor = Input(shape=(224, 224, 3))
+base1 = MobileNetV2(include_top=False, input_tensor=input_tensor, weights='imagenet')
+base2 = DenseNet121(include_top=False, input_tensor=input_tensor, weights='imagenet')
 
-# MobileNetV2 branch
-mnet = MobileNetV2(include_top=False, weights="imagenet", input_tensor=input_tensor)
-for layer in mnet.layers:
+for layer in base1.layers:
     layer.trainable = False
-x1 = GlobalAveragePooling2D()(mnet.output)
-
-# DenseNet121 branch
-dnet = DenseNet121(include_top=False, weights="imagenet", input_tensor=input_tensor)
-for layer in dnet.layers:
+for layer in base2.layers:
     layer.trainable = False
-x2 = GlobalAveragePooling2D()(dnet.output)
 
-# Combine
-x = Concatenate()([x1, x2])
-x = Dropout(0.5)(x)
-output = Dense(train_gen.num_classes, activation="softmax")(x)
+x1 = GlobalAveragePooling2D()(base1.output)
+x2 = GlobalAveragePooling2D()(base2.output)
+merged = Concatenate()([x1, x2])
+output = Dense(train_gen.num_classes, activation='softmax')(merged)
 
 model = Model(inputs=input_tensor, outputs=output)
 
-# ✅ Compile and train
-model.compile(optimizer=Adam(), loss="categorical_crossentropy", metrics=["accuracy"])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-model.fit(train_gen, validation_data=val_gen, epochs=5)
+# ✅ Train model
+history = model.fit(
+    train_gen,
+    validation_data=valid_gen,
+    epochs=10
+)
 
-# ✅ Save and upload model
-os.makedirs("model", exist_ok=True)
-model_path = os.path.join("model", "hybrid_model.h5")
-model.save(model_path)
-task.upload_artifact("hybrid_model", model_path)
-
-print("✅ Step 3 completed. Model saved and uploaded:", model_path)
+# ✅ Save model
+model.save("hybrid_model.h5")
+task.upload_artifact("trained_model", artifact_object="hybrid_model.h5")
+task.close()
