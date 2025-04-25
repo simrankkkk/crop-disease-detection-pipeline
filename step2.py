@@ -1,52 +1,52 @@
+# step2.py — Data Preprocessing (Torch-Free, Pipeline-Compatible)
 
 import os
-import zipfile
 import shutil
 from clearml import Task, Dataset
-from sklearn.model_selection import train_test_split
 import numpy as np
-import random
+from PIL import Image
+from sklearn.model_selection import train_test_split
 
-def main():
-    # Connect to ClearML Task
-    task = Task.init(project_name='PlantPipeline', task_name='step2-preprocess-data', task_type=Task.TaskTypes.data_processing)
+# 🚀 Connect to ClearML Task
+task = Task.init(project_name="PlantPipeline", task_name="step2 preprocessing")
+dataset_path = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71").get_local_copy()
 
-    # Get dataset uploaded to ClearML
-    dataset = Dataset.get(dataset_id='105163c10d0a4bbaa06055807084ec71')
-    local_dataset_path = dataset.get_local_copy()
+# ✅ Define output path
+output_dir = os.path.join(os.getcwd(), "processed")
+os.makedirs(output_dir, exist_ok=True)
 
-    # Define output directory
-    output_dir = os.path.join(os.getcwd(), 'processed_data')
-    os.makedirs(output_dir, exist_ok=True)
+# ✅ Prepare data
+image_paths = []
+labels = []
 
-    # Define train/valid folders
-    train_dir = os.path.join(output_dir, 'train')
-    valid_dir = os.path.join(output_dir, 'valid')
-    os.makedirs(train_dir, exist_ok=True)
-    os.makedirs(valid_dir, exist_ok=True)
+for class_dir in os.listdir(dataset_path + "/train"):
+    class_path = os.path.join(dataset_path, "train", class_dir)
+    if os.path.isdir(class_path):
+        for fname in os.listdir(class_path):
+            if fname.lower().endswith((".jpg", ".png", ".jpeg")):
+                image_paths.append(os.path.join(class_path, fname))
+                labels.append(class_dir)
 
-    # Preprocess logic (80-20 split maintaining subfolder structure)
-    np.random.seed(42)
-    random.seed(42)
-    all_classes = os.listdir(local_dataset_path)
+# 🔀 Train/Val Split
+X_train, X_val, y_train, y_val = train_test_split(
+    image_paths, labels, test_size=0.2, stratify=labels, random_state=42
+)
 
-    for class_name in all_classes:
-        class_path = os.path.join(local_dataset_path, class_name)
-        if not os.path.isdir(class_path):
-            continue
-        images = os.listdir(class_path)
-        train_imgs, val_imgs = train_test_split(images, test_size=0.2, random_state=42)
+# 🧼 Rescale & Save
+def preprocess_and_save(img_path, label, split):
+    img = Image.open(img_path).convert("RGB")
+    img = img.resize((224, 224))  # ✅ same as AIS notebook
+    target_dir = os.path.join(output_dir, split, label)
+    os.makedirs(target_dir, exist_ok=True)
+    img.save(os.path.join(target_dir, os.path.basename(img_path)))
 
-        os.makedirs(os.path.join(train_dir, class_name), exist_ok=True)
-        os.makedirs(os.path.join(valid_dir, class_name), exist_ok=True)
+for img_path, label in zip(X_train, y_train):
+    preprocess_and_save(img_path, label, "train")
 
-        for img in train_imgs:
-            shutil.copy(os.path.join(class_path, img), os.path.join(train_dir, class_name, img))
-        for img in val_imgs:
-            shutil.copy(os.path.join(class_path, img), os.path.join(valid_dir, class_name, img))
+for img_path, label in zip(X_val, y_val):
+    preprocess_and_save(img_path, label, "valid")
 
-    # Return path for training step
-    return output_dir
-
-if __name__ == "__main__":
-    main()
+# ✅ Log artifacts and finish
+print(f"✅ Preprocessed data saved to: {output_dir}")
+task.upload_artifact(name="processed_dataset", artifact_object=output_dir)
+task.close()
