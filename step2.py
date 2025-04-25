@@ -1,3 +1,4 @@
+task = Task.init(project_name="PlantPipeline", task_name="step 2: Preprocess Data")
 # step2_data_preprocessing.py
 import os, shutil
 from clearml import Task, Dataset
