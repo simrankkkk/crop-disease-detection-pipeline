@@ -1,34 +1,38 @@
-from clearml import PipelineController
+# pipeline_from_tasks.py
+from clearml.automation.controller import PipelineController
 
-# ✅ Create the pipeline controller
-pipe = PipelineController(
-    name="Plant Disease Detection Full Pipeline",
-    project="plantdataset",
-    version="1.0"
-)
+if __name__ == '__main__':
+    pipe = PipelineController(
+        project='PlantPipeline',
+        name='Crop Disease Detection Pipeline',
+        version='1.0'
+    )
 
-# ✅ Step 1 - Dataset Loading
-pipe.add_step(
-    name="step1_upload",
-    base_task_project="plantdataset",
-    base_task_name="Clone Of Upload New Augmented Plant Disease Dataset"
-)
+    # Step 1: fetch existing dataset
+    pipe.add_step(
+        name='fetch_dataset',
+        function='step1_fetch_dataset.py',  # or function=step1_fetch_dataset if imported
+        clone=False
+    )
 
-# ✅ Step 2 - Preprocessing (Torch-free)
-pipe.add_step(
-    name="step2_preprocess",
-    base_task_project="plantdataset",
-    base_task_name="step2 without torch",
-    parents=["step1_upload"]
-)
+    # Step 2: preprocess
+    pipe.add_step(
+        name='preprocess_data',
+        function='step2_data_preprocessing.py',
+        function_kwargs={'dataset_id': '${fetch_dataset.output}'},
+        parent='fetch_dataset',
+        clone=False
+    )
 
-# ✅ Step 3 - Hybrid Training (TF, No Torch)
-pipe.add_step(
-    name="step3_train",
-    base_task_project="plantdataset",
-    base_task_name="Clone Of Clone Of step3notorch",
-    parents=["step2_preprocess"]
-)
+    # Step 3: train
+    pipe.add_step(
+        name='train_model',
+        function='step3_train_model.py',
+        function_kwargs={'processed_folder': '${preprocess_data.output}'},
+        parent='preprocess_data',
+        clone=False
+    )
 
-# ✅ Launch the pipeline (use your agent queue)
-pipe.start(queue="mansimran-gpu")
+    # launch on your default queue
+    pipe.start(queue='default', sleep_interval=5)
+    print("✅ Pipeline started.")
