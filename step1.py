@@ -1,3 +1,5 @@
+task = Task.init(project_name="PlantPipeline", task_name="step 1: Upload Dataset")
+
 # step1_fetch_dataset.py
 from clearml import Task, Dataset
 
