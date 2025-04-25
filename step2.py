@@ -1,52 +1,53 @@
-# step2.py — Data Preprocessing (Torch-Free, Pipeline-Compatible)
-
 import os
 import shutil
-from clearml import Task, Dataset
 import numpy as np
-from PIL import Image
-from sklearn.model_selection import train_test_split
+from clearml import Task, Dataset
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-# 🚀 Connect to ClearML Task
-task = Task.init(project_name="PlantPipeline", task_name="step2 preprocessing")
-dataset_path = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71").get_local_copy()
+# ✅ Step 1: Init ClearML task
+task = Task.init(project_name="PlantPipeline", task_name="Step 2 - Data Preprocessing")
+dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
+dataset_path = dataset.get_local_copy()
 
-# ✅ Define output path
-output_dir = os.path.join(os.getcwd(), "processed")
-os.makedirs(output_dir, exist_ok=True)
+# ✅ Step 2: Define output directory
+output_dir = os.path.join(os.getcwd(), "processed_data")
+train_dir = os.path.join(output_dir, "train")
+val_dir = os.path.join(output_dir, "valid")
 
-# ✅ Prepare data
-image_paths = []
-labels = []
+# ✅ Step 3: Copy images from ClearML cache to output folder safely
+for split in ["train", "valid"]:
+    os.makedirs(os.path.join(output_dir, split), exist_ok=True)
+    split_path = os.path.join(dataset_path, split)
+    for class_name in os.listdir(split_path):
+        class_path = os.path.join(split_path, class_name)
+        dest_path = os.path.join(output_dir, split, class_name)
+        os.makedirs(dest_path, exist_ok=True)
+        for file in os.listdir(class_path):
+            src_file = os.path.join(class_path, file)
+            dst_file = os.path.join(dest_path, file)
+            if os.path.isfile(src_file):
+                shutil.copy(src_file, dst_file)
 
-for class_dir in os.listdir(dataset_path + "/train"):
-    class_path = os.path.join(dataset_path, "train", class_dir)
-    if os.path.isdir(class_path):
-        for fname in os.listdir(class_path):
-            if fname.lower().endswith((".jpg", ".png", ".jpeg")):
-                image_paths.append(os.path.join(class_path, fname))
-                labels.append(class_dir)
+# ✅ Step 4: Rescale images using ImageDataGenerator
+datagen = ImageDataGenerator(rescale=1.0 / 255)
 
-# 🔀 Train/Val Split
-X_train, X_val, y_train, y_val = train_test_split(
-    image_paths, labels, test_size=0.2, stratify=labels, random_state=42
+train_gen = datagen.flow_from_directory(
+    train_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode="categorical",
 )
 
-# 🧼 Rescale & Save
-def preprocess_and_save(img_path, label, split):
-    img = Image.open(img_path).convert("RGB")
-    img = img.resize((224, 224))  # ✅ same as AIS notebook
-    target_dir = os.path.join(output_dir, split, label)
-    os.makedirs(target_dir, exist_ok=True)
-    img.save(os.path.join(target_dir, os.path.basename(img_path)))
+val_gen = datagen.flow_from_directory(
+    val_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode="categorical",
+)
 
-for img_path, label in zip(X_train, y_train):
-    preprocess_and_save(img_path, label, "train")
+# ✅ Step 5: Save class index mapping
+np.save(os.path.join(output_dir, "class_indices.npy"), train_gen.class_indices)
 
-for img_path, label in zip(X_val, y_val):
-    preprocess_and_save(img_path, label, "valid")
+print("✅ Preprocessing completed. Processed data stored in:", output_dir)
 
-# ✅ Log artifacts and finish
-print(f"✅ Preprocessed data saved to: {output_dir}")
-task.upload_artifact(name="processed_dataset", artifact_object=output_dir)
 task.close()
