@@ -1,7 +1,13 @@
-clearml
-tensorflow
-numpy
-pillow
-matplotlib
-scikit-learn
-opencv-python
+# ClearML SDK for experiment + pipeline orchestration
+clearml>=1.18.0
+
+# Core ML & data handling
+tensorflow>=2.8.0        # matches your use of tf.keras (MobileNetV2, DenseNet121, hybrid)
+numpy>=1.21.0            # for history arrays, concatenation, etc.
+scikit-learn>=1.0.0      # for any metrics or preprocessing you might add
+
+# Image I/O
+opencv-python>=4.5.0     # your load/resize/augment via cv2
+
+# Plotting (if you surface any plots)
+matplotlib>=3.4.0
