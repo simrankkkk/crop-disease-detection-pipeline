@@ -119,7 +119,6 @@ def crop_pipeline():
     preprocessed_dataset_id = stage_preprocess(uploaded_dataset_id=uploaded_dataset_id)
     stage_train(preprocessed_dataset_id=preprocessed_dataset_id)
 
-# Run the pipeline
+# RUN PIPELINE
 if __name__ == "__main__":
-    PipelineDecorator.run()
     crop_pipeline()
