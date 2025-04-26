@@ -11,11 +11,13 @@ from tensorflow.keras.layers import Input, GlobalAveragePooling2D, Dense, Dropou
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import Adam
 
-# ✨ Step 1: Upload existing dataset
-@PipelineDecorator.component(name="stage_upload")
-def stage_upload():
-    dataset_path = "/Users/simran/.clearml/cache/storage_manager/datasets/105163c10d0a4bbaa06055807084ec71"  # ✅ Your ClearML dataset path
-    return dataset_path
+@PipelineDecorator.pipeline(
+    name="CropPipeline",
+    project="PlantPipeline",
+    version="1.0",
+    repo="https://github.com/simrankkkk/crop-disease-detection-pipeline.git",  # 🔥 Add repo=
+    branch="main",   # 🔥 Add branch=
+)
 
 # ✨ Step 2: Preprocessing
 @PipelineDecorator.component(name="stage_preprocess")
