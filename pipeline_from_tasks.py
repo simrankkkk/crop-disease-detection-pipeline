@@ -14,10 +14,9 @@ from tensorflow.keras.optimizers import Adam
 @PipelineDecorator.pipeline(
     name="CropPipeline",
     project="PlantPipeline",
-    version="1.0",
-    repo="https://github.com/simrankkkk/crop-disease-detection-pipeline.git",  # 🔥 Add repo=
-    branch="main",   # 🔥 Add branch=
+    version="1.0"
 )
+
 
 # ✨ Step 2: Preprocessing
 @PipelineDecorator.component(name="stage_preprocess")
