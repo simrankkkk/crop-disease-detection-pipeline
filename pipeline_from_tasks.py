@@ -8,14 +8,12 @@ def stage_upload():
 
 @PipelineDecorator.component(name="stage_preprocess", return_values=["preprocessed_dataset_id"])
 def stage_preprocess(uploaded_dataset_id):
-    # Your preprocessing logic here...
-    # Dummy return to keep flow
+    # Dummy preprocessing for now
     return uploaded_dataset_id
 
 @PipelineDecorator.component(name="stage_train")
 def stage_train(preprocessed_dataset_id):
-    # Your training logic here...
-    print(f"Training with dataset: {preprocessed_dataset_id}")
+    print(f"Training with preprocessed dataset: {preprocessed_dataset_id}")
 
 @PipelineDecorator.pipeline(
     name="CropPipeline",
@@ -28,4 +26,8 @@ def crop_pipeline():
     stage_train(preprocessed_dataset_id=preprocessed_dataset_id)
 
 if __name__ == "__main__":
-    crop_pipeline()
+    pipe = crop_pipeline()
+    pipe.set_default_execution_queue("default")   # ✅ critical!
+    pipe.start()
+    pipe.wait()
+    pipe.stop()
