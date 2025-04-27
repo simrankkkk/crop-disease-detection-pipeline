@@ -15,7 +15,7 @@ PipelineDecorator.set_default_execution_queue("pipeline")
 def stage_upload():
     from clearml import Dataset, Task
     dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
-    path = dataset.get_local_copy(force=True)
+    path = dataset.get_local_copy()
     print("✅ Downloaded dataset to:", path)
     # auto‐upload original as artifact if you like:
     Task.current_task().upload_artifact("raw_dataset", path)
