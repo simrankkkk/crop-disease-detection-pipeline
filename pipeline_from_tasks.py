@@ -26,39 +26,39 @@ def stage_upload():
     print("✅ Raw dataset downloaded to:", path)
     return path
 
-# ─── Stage 2: Preprocess & publish new Dataset ────────────────────────────────
 @PipelineDecorator.component(
     name="stage_preprocess",
     return_values=["processed_dataset_id"],
     execution_queue="default"
 )
 def stage_preprocess(uploaded_dataset_path):
+    from clearml import Dataset
+    from pathlib import Path
+    from PIL import Image
+    import shutil
+
     inp = Path(uploaded_dataset_path)
     out = Path("processed_data")
     if out.exists():
-        import shutil
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
-    print("🔄 Resizing images to 224×224…")
     for cls in inp.iterdir():
         if not cls.is_dir(): continue
         dst = out / cls.name
         dst.mkdir(exist_ok=True)
         for img in cls.iterdir():
-            if img.suffix.lower() not in (".jpg", ".jpeg", ".png"):
+            if img.suffix.lower() not in (".jpg", ".jpeg", ".png"): 
                 continue
-            try:
-                Image.open(img).convert("RGB").resize((224,224)).save(dst / img.name)
-            except Exception as e:
-                print(f"⚠️ Skipped {img.name}: {e}")
+            Image.open(img).convert("RGB").resize((224,224)).save(dst / img.name)
 
-    # Publish processed_data as a ClearML Dataset
+    # publish as a new ClearML Dataset
     ds = Dataset.create(
         dataset_name="plant_processed_data",
         dataset_project="PlantPipeline"
     )
-    ds.add_files(path_str=str(out))
+    # CORRECTED: pass the folder path positionally, not as `path_str=`
+    ds.add_files(str(out))
     processed_id = ds.finalize()
     print("✅ Created processed dataset ID:", processed_id)
     return processed_id
