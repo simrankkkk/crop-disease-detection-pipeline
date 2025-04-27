@@ -9,11 +9,7 @@ from tensorflow.keras.applications import MobileNetV2, DenseNet121
 from tensorflow.keras.layers import Input, GlobalAveragePooling2D, Concatenate, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-import os
-import shutil
-
-# (Optional) explicitly target the default queue:
-# PipelineDecorator.set_default_execution_queue("default")
+import os, shutil
 
 # ─── Stage 1: Download raw dataset ────────────────────────────────────────────
 @PipelineDecorator.component(
@@ -22,13 +18,12 @@ import shutil
     execution_queue="default"
 )
 def stage_upload():
-    # Pull the dataset by its ClearML ID
     dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
     path = dataset.get_local_copy()
     print("✅ Raw dataset downloaded to:", path)
     return path
 
-# ─── Stage 2: Preprocess images & publish a new Dataset ───────────────────────
+# ─── Stage 2: Preprocess & publish as new Dataset ─────────────────────────────
 @PipelineDecorator.component(
     name="stage_preprocess",
     return_values=["processed_dataset_id"],
@@ -43,15 +38,14 @@ def stage_preprocess(uploaded_dataset_path):
 
     print("🔄 Resizing images to 224×224…")
     for cls_dir in inp.iterdir():
-        if not cls_dir.is_dir():
-            continue
+        if not cls_dir.is_dir(): continue
         dst = out / cls_dir.name
         dst.mkdir(exist_ok=True)
         for img_path in cls_dir.iterdir():
             if img_path.suffix.lower() not in (".jpg", ".jpeg", ".png"):
                 continue
             try:
-                Image.open(img_path).convert("RGB").resize((224, 224)).save(dst / img_path.name)
+                Image.open(img_path).convert("RGB").resize((224,224)).save(dst / img_path.name)
             except Exception as e:
                 print(f"⚠️ Skipped {img_path.name}: {e}")
 
@@ -60,11 +54,12 @@ def stage_preprocess(uploaded_dataset_path):
         dataset_name="plant_processed_data",
         dataset_project="PlantPipeline"
     )
-    ds.add_files(str(out))   # add all files under processed_data/
-    ds.upload()              # flush uploads before finalizing
-    processed_id = ds.finalize()
-    print("✅ Created processed dataset ID:", processed_id)
-    return processed_id
+    ds.add_files(str(out))
+    ds.upload()             # ensure files are uploaded
+    ds.finalize()           # registers the dataset
+    dataset_id = ds.id      # <— grab the string ID here
+    print("✅ Created processed dataset ID:", dataset_id)
+    return dataset_id
 
 # ─── Stage 3: Train hybrid model using processed Dataset ─────────────────────
 @PipelineDecorator.component(
@@ -72,26 +67,23 @@ def stage_preprocess(uploaded_dataset_path):
     execution_queue="default"
 )
 def stage_train(processed_dataset_id):
-    # Download the processed images
+    # fetch the processed-data dataset by its string ID
     ds = Dataset.get(dataset_id=processed_dataset_id)
     base_dir = ds.get_local_copy()
     print("✅ Retrieved processed data from:", base_dir)
 
     # Data generators with 20% validation split
-    img_size = (224, 224)
-    batch_size = 32
+    img_size, batch = (224,224), 32
     gen = ImageDataGenerator(rescale=1.0/255, validation_split=0.2)
-    train_gen = gen.flow_from_directory(
-        base_dir, target_size=img_size, batch_size=batch_size,
-        class_mode="categorical", subset="training"
-    )
-    val_gen = gen.flow_from_directory(
-        base_dir, target_size=img_size, batch_size=batch_size,
-        class_mode="categorical", subset="validation"
-    )
+    train_gen = gen.flow_from_directory(base_dir, target_size=img_size,
+                                        batch_size=batch, class_mode="categorical",
+                                        subset="training")
+    val_gen   = gen.flow_from_directory(base_dir, target_size=img_size,
+                                        batch_size=batch, class_mode="categorical",
+                                        subset="validation")
 
     # Build frozen dual‐backbone model
-    inp = Input(shape=(*img_size, 3))
+    inp = Input(shape=(*img_size,3))
     m1 = MobileNetV2(include_top=False, input_tensor=inp, weights="imagenet")
     m2 = DenseNet121(include_top=False, input_tensor=inp, weights="imagenet")
     for layer in m1.layers + m2.layers:
