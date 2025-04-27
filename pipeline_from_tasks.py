@@ -1,38 +1,38 @@
 # pipeline_from_tasks.py
 
+from clearml import Dataset, Task
 from clearml.automation.controller import PipelineDecorator
+from pathlib import Path
+from PIL import Image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import MobileNetV2, DenseNet121
+from tensorflow.keras.layers import Input, GlobalAveragePooling2D, Concatenate, Dense, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+import os
 
-# ─── Ensure all steps land on the “pipeline” queue ─────────────────────────────
-PipelineDecorator.set_default_execution_queue("pipeline")
+# use the default queue (no override needed)
+# PipelineDecorator.set_default_execution_queue("default")
 
-# ─── Stage 1: Upload ─────────────────────────────────────────────────────────
+# ─── Stage 1: Download raw dataset ────────────────────────────────────────────
 @PipelineDecorator.component(
     name="stage_upload",
     return_values=["uploaded_dataset_path"],
-    execution_queue="pipeline",
-    docker="tensorflow/tensorflow:2.11.0"
+    execution_queue="default"
 )
 def stage_upload():
-    from clearml import Dataset, Task
     dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
     path = dataset.get_local_copy()
-    print("✅ Downloaded dataset to:", path)
-    # auto‐upload original as artifact if you like:
-    Task.current_task().upload_artifact("raw_dataset", path)
+    print("✅ Raw dataset downloaded to:", path)
     return path
 
-# ─── Stage 2: Preprocess ──────────────────────────────────────────────────────
+# ─── Stage 2: Preprocess & publish new Dataset ────────────────────────────────
 @PipelineDecorator.component(
     name="stage_preprocess",
-    return_values=["preprocessed_data_path"],
-    execution_queue="pipeline",
-    docker="tensorflow/tensorflow:2.11.0"
+    return_values=["processed_dataset_id"],
+    execution_queue="default"
 )
 def stage_preprocess(uploaded_dataset_path):
-    from pathlib import Path
-    from PIL import Image
-    from clearml import Task
-
     inp = Path(uploaded_dataset_path)
     out = Path("processed_data")
     if out.exists():
@@ -40,54 +40,54 @@ def stage_preprocess(uploaded_dataset_path):
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
-    print("✅ Resizing images to 224×224 …")
+    print("🔄 Resizing images to 224×224…")
     for cls in inp.iterdir():
         if not cls.is_dir(): continue
-        dest = out / cls.name
-        dest.mkdir(exist_ok=True)
+        dst = out / cls.name
+        dst.mkdir(exist_ok=True)
         for img in cls.iterdir():
             if img.suffix.lower() not in (".jpg", ".jpeg", ".png"):
                 continue
             try:
-                Image.open(img).convert("RGB").resize((224,224)).save(dest / img.name)
+                Image.open(img).convert("RGB").resize((224,224)).save(dst / img.name)
             except Exception as e:
-                print(f"⚠️  Skipped {img.name}: {e}")
+                print(f"⚠️ Skipped {img.name}: {e}")
 
-    # record the processed data
-    Task.current_task().upload_artifact(name="preprocessed_dataset", artifact_object=str(out))
-    print("✅ Preprocessing done.")
-    return str(out)
+    # Publish processed_data as a ClearML Dataset
+    ds = Dataset.create(
+        dataset_name="plant_processed_data",
+        dataset_project="PlantPipeline"
+    )
+    ds.add_files(path_str=str(out))
+    processed_id = ds.finalize()
+    print("✅ Created processed dataset ID:", processed_id)
+    return processed_id
 
-# ─── Stage 3: Train with split ────────────────────────────────────────────────
+# ─── Stage 3: Train using the processed Dataset ───────────────────────────────
 @PipelineDecorator.component(
     name="stage_train",
-    execution_queue="pipeline",
-    docker="tensorflow/tensorflow:2.11.0"
+    execution_queue="default"
 )
-def stage_train(preprocessed_data_path):
-    from clearml import Task
-    from tensorflow.keras.preprocessing.image import ImageDataGenerator
-    from tensorflow.keras.applications import MobileNetV2, DenseNet121
-    from tensorflow.keras.layers import Input, GlobalAveragePooling2D, Concatenate, Dense, Dropout
-    from tensorflow.keras.models import Model
-    from tensorflow.keras.optimizers import Adam
-    import os
+def stage_train(processed_dataset_id):
+    # download the processed images
+    ds = Dataset.get(dataset_id=processed_dataset_id)
+    base_dir = ds.get_local_copy()
+    print("✅ Retrieved processed data from:", base_dir)
 
-    base_dir = preprocessed_data_path
+    # setup generators with 20% validation split
     img_size = (224,224)
-    batch = 32
-    val_split = 0.2
-
-    gen = ImageDataGenerator(rescale=1./255, validation_split=val_split)
+    batch_size = 32
+    gen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
     train_gen = gen.flow_from_directory(
-        base_dir, target_size=img_size, batch_size=batch,
+        base_dir, target_size=img_size, batch_size=batch_size,
         class_mode="categorical", subset="training"
     )
     val_gen = gen.flow_from_directory(
-        base_dir, target_size=img_size, batch_size=batch,
+        base_dir, target_size=img_size, batch_size=batch_size,
         class_mode="categorical", subset="validation"
     )
 
+    # build the hybrid model
     inp = Input(shape=(*img_size,3))
     m1 = MobileNetV2(include_top=False, input_tensor=inp, weights="imagenet")
     m2 = DenseNet121(include_top=False, input_tensor=inp, weights="imagenet")
@@ -106,22 +106,23 @@ def stage_train(preprocessed_data_path):
     model.compile(optimizer=Adam(1e-4), loss="categorical_crossentropy", metrics=["accuracy"])
     model.fit(train_gen, validation_data=val_gen, epochs=5)
 
+    # save & upload the final model
     os.makedirs("model_output", exist_ok=True)
-    save_path = os.path.join("model_output", "hybrid_model.h5")
-    model.save(save_path)
-    Task.current_task().upload_artifact(name="hybrid_model", artifact_object=save_path)
-    print("✅ Training complete, model saved to:", save_path)
+    model_path = os.path.join("model_output", "hybrid_model.h5")
+    model.save(model_path)
+    Task.current_task().upload_artifact(name="hybrid_model", artifact_object=model_path)
+    print("✅ Training complete, model at:", model_path)
 
-# ─── Controller: tie the steps together ───────────────────────────────────────
+# ─── Assemble & register the pipeline ────────────────────────────────────────
 @PipelineDecorator.pipeline(
     name="Crop Disease Detection Pipeline",
     project="PlantPipeline",
     version="1.0"
 )
 def crop_pipeline():
-    ds = stage_upload()
-    pp = stage_preprocess(uploaded_dataset_path=ds)
-    stage_train(preprocessed_data_path=pp)
+    ds_path       = stage_upload()
+    processed_id  = stage_preprocess(uploaded_dataset_path=ds_path)
+    stage_train(processed_dataset_id=processed_id)
 
 if __name__ == "__main__":
     crop_pipeline()
