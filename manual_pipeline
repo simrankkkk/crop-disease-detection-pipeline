@@ -105,7 +105,7 @@ if __name__ == "__main__":
         version="1.0",
         add_pipeline_tags=False
     )
-    # no set_default_execution_queue → uses "default" queue
+    pipe.set_default_execution_queue("default") 
 
     pipe.add_function_step("stage_upload",        stage_upload,       pre_execute_callback=pre_execute_callback)
     pipe.add_function_step("stage_preprocess",    stage_preprocess,   parents=["stage_upload"],    pre_execute_callback=pre_execute_callback)
