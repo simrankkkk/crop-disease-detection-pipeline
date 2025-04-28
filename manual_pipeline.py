@@ -11,67 +11,61 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import os, shutil
 
-# ─── Optional callbacks ───────────────────────────────────────────────────────
+# ─── Optional callbacks ────────────────────────────────────────────────────────
 def pre_execute_callback(pipeline, node, param_override):
-    print(f"[CB] About to run step '{node.name}' with params: {param_override}")
+    print(f"[CB] About to run {node.name} with params {param_override}")
     return True
 
 def post_execute_callback(pipeline, node):
-    print(f"[CB] Completed step '{node.name}', Task ID = {node.executed}")
+    print(f"[CB] Finished {node.name}, Task ID={node.executed}")
 
-# ─── Step 1: download raw dataset ──────────────────────────────────────────────
+# ─── Step 1: Download raw dataset ──────────────────────────────────────────────
 def stage_upload():
     ds = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
     path = ds.get_local_copy()
-    print("✅ Raw dataset at:", path)
-    return path
+    print("✅ Raw data at", path)
+    return path  # returns a str
 
-# ─── Step 2: preprocess & publish dataset ──────────────────────────────────────
-def stage_preprocess(uploaded_dataset_path):
+# ─── Step 2: Preprocess & publish ──────────────────────────────────────────────
+def stage_preprocess(uploaded_dataset_path: str):
     inp = Path(uploaded_dataset_path)
     out = Path("processed_data")
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
 
-    print("🔄 Resizing images to 224×224…")
-    for split in ("train", "valid"):
-        src, dst = inp / split, out / split
+    print("🔄 Resizing images…")
+    for split in ("train","valid"):
+        src, dst = inp/split, out/split
         dst.mkdir(exist_ok=True)
         for cls in src.iterdir():
             if not cls.is_dir(): continue
-            (dst / cls.name).mkdir(exist_ok=True)
+            (dst/cls.name).mkdir(exist_ok=True)
             for img in cls.iterdir():
-                if img.suffix.lower() in (".jpg", ".jpeg", ".png"):
-                    try:
-                        Image.open(img).convert("RGB").resize((224,224))\
-                             .save(dst / cls.name / img.name)
-                    except Exception as e:
-                        print(f"⚠️ Skipped {img.name}: {e}")
+                if img.suffix.lower() not in (".jpg",".jpeg",".png"): 
+                    continue
+                Image.open(img).convert("RGB")\
+                     .resize((224,224))\
+                     .save(dst/cls.name/img.name)
 
-    # publish as new ClearML Dataset
-    new_ds = Dataset.create(
-        dataset_name="plant_processed_data",
-        dataset_project="PlantPipeline"
-    )
+    new_ds = Dataset.create("plant_processed_data", "PlantPipeline")
     new_ds.add_files(str(out))
     new_ds.upload()
     new_ds.finalize()
-    print("✅ Published processed dataset ID = ", new_ds.id)
-    return new_ds.id
+    print("✅ Published processed dataset ID =", new_ds.id)
+    return new_ds.id  # returns a str
 
-# ─── Step 3: train the hybrid model ────────────────────────────────────────────
-def stage_train(processed_dataset_id):
+# ─── Step 3: Train the hybrid model ────────────────────────────────────────────
+def stage_train(processed_dataset_id: str):
     ds = Dataset.get(dataset_id=processed_dataset_id)
     base = ds.get_local_copy()
-    print("✅ Retrieved processed data from:", base)
+    print("✅ Retrieved processed data from", base)
 
-    train_dir, valid_dir = os.path.join(base,"train"), os.path.join(base,"valid")
+    train_dir = os.path.join(base, "train")
+    valid_dir = os.path.join(base, "valid")
     gen = ImageDataGenerator(rescale=1.0/255)
-    train_gen = gen.flow_from_directory(train_dir, target_size=(224,224),
-                                        batch_size=32, class_mode="categorical")
-    val_gen   = gen.flow_from_directory(valid_dir, target_size=(224,224),
-                                        batch_size=32, class_mode="categorical")
+    train_gen = gen.flow_from_directory(train_dir, (224,224), batch_size=32, class_mode="categorical")
+    val_gen   = gen.flow_from_directory(valid_dir, (224,224), batch_size=32, class_mode="categorical")
 
     inp = Input(shape=(224,224,3))
     m1 = MobileNetV2(include_top=False, input_tensor=inp, weights="imagenet")
@@ -95,20 +89,42 @@ def stage_train(processed_dataset_id):
     model_path = os.path.join("model_output", "hybrid_model.h5")
     model.save(model_path)
     Task.current_task().upload_artifact(name="hybrid_model", artifact_object=model_path)
-    print("✅ Training complete, model saved to:", model_path)
+    print("✅ Model saved to", model_path)
 
-# ─── Assemble & launch the pipeline ───────────────────────────────────────────
+# ─── Assemble & launch the pipeline ────────────────────────────────────────────
 if __name__ == "__main__":
     pipe = PipelineController(
-        name="New Crop Pipeline",      # this tile title is new/different
-        project="PlantPipeline",   # same project folder
-        version="1.1",
+        name="Crop Pipeline",
+        project="PlantPipeline",
+        version="1.3",           # ← bumped to 1.3 for a fresh tile
         add_pipeline_tags=False
     )
-    pipe.set_default_execution_queue("default") 
+    pipe.set_default_execution_queue("default")
 
-    pipe.add_function_step("stage_upload",        stage_upload,       pre_execute_callback=pre_execute_callback)
-    pipe.add_function_step("stage_preprocess",    stage_preprocess,   parents=["stage_upload"],    pre_execute_callback=pre_execute_callback)
-    pipe.add_function_step("stage_train",         stage_train,        parents=["stage_preprocess"], pre_execute_callback=pre_execute_callback, post_execute_callback=post_execute_callback)
+    # Capture the raw-path return as "uploaded_dataset_path"
+    pipe.add_function_step(
+        name="stage_upload",
+        function=stage_upload,
+        function_return=["uploaded_dataset_path"],
+        pre_execute_callback=pre_execute_callback
+    )
+    # Pass that into preprocess, capture its return as "processed_dataset_id"
+    pipe.add_function_step(
+        name="stage_preprocess",
+        function=stage_preprocess,
+        parents=["stage_upload"],
+        function_kwargs={"uploaded_dataset_path": "${stage_upload.uploaded_dataset_path}"},
+        function_return=["processed_dataset_id"],
+        pre_execute_callback=pre_execute_callback
+    )
+    # Finally wire processed_dataset_id into training
+    pipe.add_function_step(
+        name="stage_train",
+        function=stage_train,
+        parents=["stage_preprocess"],
+        function_kwargs={"processed_dataset_id": "${stage_preprocess.processed_dataset_id}"},
+        pre_execute_callback=pre_execute_callback,
+        post_execute_callback=post_execute_callback
+    )
 
     pipe.start()
