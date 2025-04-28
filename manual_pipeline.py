@@ -102,7 +102,7 @@ if __name__ == "__main__":
     pipe = PipelineController(
         name="New Crop Pipeline",      # this tile title is new/different
         project="PlantPipeline",   # same project folder
-        version="1.0",
+        version="1.1",
         add_pipeline_tags=False
     )
     pipe.set_default_execution_queue("default") 
