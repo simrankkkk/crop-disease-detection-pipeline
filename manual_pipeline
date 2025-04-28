@@ -11,26 +11,22 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import os, shutil
 
-# ─── Callbacks (exactly like the GitHub example) ───────────────────────────────
-
+# ─── Optional callbacks ───────────────────────────────────────────────────────
 def pre_execute_callback(pipeline, node, param_override):
-    # called just before each step runs
-    print(f"[CB] About to execute step '{node.name}' with params {param_override}")
-    return True  # return False to skip this node (and its subtree)
+    print(f"[CB] About to run step `{node.name}` with params {param_override}")
+    return True
 
 def post_execute_callback(pipeline, node):
-    # called right after each step completes
-    print(f"[CB] Completed step '{node.name}', executed Task ID = {node.executed}")
-    return
+    print(f"[CB] Finished step `{node.name}`, launched Task ID = {node.executed}")
 
-# ─── Your “template” functions (same logic you already tested) ─────────────────
-
+# ─── Stage 1: download raw dataset ────────────────────────────────────────────
 def stage_upload():
     ds = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
     path = ds.get_local_copy()
-    print("✅ Raw dataset downloaded to:", path)
+    print(f"✅ Raw dataset at `{path}`")
     return path
 
+# ─── Stage 2: preprocess & publish new dataset ────────────────────────────────
 def stage_preprocess(uploaded_dataset_path):
     inp = Path(uploaded_dataset_path)
     out = Path("processed_data")
@@ -39,20 +35,23 @@ def stage_preprocess(uploaded_dataset_path):
     out.mkdir(parents=True, exist_ok=True)
 
     print("🔄 Resizing images to 224×224…")
-    for split in ("train","valid"):
+    for split in ("train", "valid"):
         src = inp / split
         dst = out / split
         dst.mkdir(exist_ok=True)
         for cls in src.iterdir():
-            if not cls.is_dir(): continue
-            (dst/cls.name).mkdir(exist_ok=True)
+            if not cls.is_dir():
+                continue
+            (dst / cls.name).mkdir(exist_ok=True)
             for img in cls.iterdir():
-                if img.suffix.lower() not in (".jpg",".jpeg",".png"):
+                if img.suffix.lower() not in (".jpg", ".jpeg", ".png"):
                     continue
-                Image.open(img).convert("RGB").resize((224,224))\
-                     .save(dst/cls.name/img.name)
+                try:
+                    Image.open(img).convert("RGB").resize((224, 224)).save(dst / cls.name / img.name)
+                except Exception as e:
+                    print(f"⚠️ Skipped {img.name}: {e}")
 
-    # publish as new ClearML Dataset
+    # publish processed_data as new ClearML Dataset
     new_ds = Dataset.create(
         dataset_name="plant_processed_data",
         dataset_project="PlantPipeline"
@@ -60,57 +59,57 @@ def stage_preprocess(uploaded_dataset_path):
     new_ds.add_files(str(out))
     new_ds.upload()
     new_ds.finalize()
-    print("✅ Created processed dataset ID:", new_ds.id)
+    print(f"✅ Published processed dataset ID = {new_ds.id}")
     return new_ds.id
 
+# ─── Stage 3: train hybrid model ──────────────────────────────────────────────
 def stage_train(processed_dataset_id):
     ds = Dataset.get(dataset_id=processed_dataset_id)
     base = ds.get_local_copy()
-    print("✅ Retrieved processed data from:", base)
+    print(f"✅ Retrieved processed data from `{base}`")
 
-    train_dir = os.path.join(base,"train")
-    valid_dir = os.path.join(base,"valid")
+    train_dir = os.path.join(base, "train")
+    valid_dir = os.path.join(base, "valid")
     gen = ImageDataGenerator(rescale=1.0/255)
-    train_gen = gen.flow_from_directory(train_dir, target_size=(224,224),
+    train_gen = gen.flow_from_directory(train_dir, target_size=(224, 224),
                                         batch_size=32, class_mode="categorical")
-    val_gen   = gen.flow_from_directory(valid_dir, target_size=(224,224),
-                                        batch_size=32, class_mode="categorical")
+    val_gen = gen.flow_from_directory(valid_dir, target_size=(224, 224),
+                                      batch_size=32, class_mode="categorical")
 
-    inp = Input(shape=(224,224,3))
+    inp = Input(shape=(224, 224, 3))
     m1 = MobileNetV2(include_top=False, input_tensor=inp, weights="imagenet")
     m2 = DenseNet121(include_top=False, input_tensor=inp, weights="imagenet")
-    for l in m1.layers + m2.layers: l.trainable = False
+    for l in m1.layers + m2.layers:
+        l.trainable = False
 
     merged = Concatenate()([
-      GlobalAveragePooling2D()(m1.output),
-      GlobalAveragePooling2D()(m2.output)
+        GlobalAveragePooling2D()(m1.output),
+        GlobalAveragePooling2D()(m2.output)
     ])
-    x = Dropout(0.3)(Dense(256, activation="relu")(merged))
-    out = Dense(train_gen.num_classes, activation="softmax")(x)
+    x = Dense(256, activation="relu")(merged)
+    x = Dropout(0.3)(x)
+    out_layer = Dense(train_gen.num_classes, activation="softmax")(x)
 
-    model = Model(inputs=inp, outputs=out)
-    model.compile(Adam(1e-4), "categorical_crossentropy", ["accuracy"])
+    model = Model(inputs=inp, outputs=out_layer)
+    model.compile(optimizer=Adam(1e-4), loss="categorical_crossentropy", metrics=["accuracy"])
     model.fit(train_gen, validation_data=val_gen, epochs=5)
 
     os.makedirs("model_output", exist_ok=True)
-    mpath = "model_output/hybrid_model.h5"
-    model.save(mpath)
-    Task.current_task().upload_artifact("hybrid_model", mpath)
-    print("✅ Training complete, model saved to:", mpath)
+    model_path = os.path.join("model_output", "hybrid_model.h5")
+    model.save(model_path)
+    Task.current_task().upload_artifact(name="hybrid_model", artifact_object=model_path)
+    print(f"✅ Training complete, model saved to `{model_path}`")
 
-# ─── Build & start the manual pipeline ────────────────────────────────────────
-
+# ─── Assemble & start the pipeline ────────────────────────────────────────────
 if __name__ == "__main__":
     pipe = PipelineController(
-        name="Crop Pipeline",           # <-- this is the tile title
-        project="PlantPipeline",        # <-- this is the folder/project
+        name="Crop Pipeline",       # appears as the pipeline tile title
+        project="PlantPipeline",    # your ClearML project/folder
         version="1.0",
-        default_queue="default",
         add_pipeline_tags=False
     )
-    pipe.set_default_execution_queue("default")
+    # no explicit queue override → uses default queue
 
-    # wrap your functions as steps, in order
     pipe.add_function_step(
         name="stage_upload",
         function=stage_upload,
@@ -130,5 +129,4 @@ if __name__ == "__main__":
         post_execute_callback=post_execute_callback
     )
 
-    # register & launch the pipeline controller
     pipe.start()
