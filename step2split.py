@@ -1,59 +1,66 @@
-# step2split.py — Preprocessing with ClearML (train/valid/test split)
-from clearml import Task, Dataset
+from clearml import Dataset, Task
+from sklearn.model_selection import train_test_split
 from pathlib import Path
 from PIL import Image
-import os, shutil
-from sklearn.model_selection import train_test_split
+import shutil
+import os
+import random
 
-# Initialize ClearML task
-task = Task.init(project_name="PlantPipeline", task_name="Step 2 - Preprocess with Split", task_type=Task.TaskTypes.data_processing)
+# ✅ Init ClearML Task
+Task.init(
+    project_name="VisiblePipeline",
+    task_name="step_preprocess",
+    task_type=Task.TaskTypes.data_processing
+)
 
-# Get input dataset
-dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
-raw_path = Path(dataset.get_local_copy())
-print("✅ Raw dataset loaded from:", raw_path)
+# ✅ Fetch raw dataset passed from step1
+dataset = Dataset.get(dataset_id=Task.current_task().get_parameters_as_dict()["General"]["dataset_task_id"])
+input_path = Path(dataset.get_local_copy())
+print("📂 Raw dataset located at:", input_path)
 
-# Output directory
-out = Path("processed_data")
-temp = out / "temp"
-if out.exists(): shutil.rmtree(out)
-temp.mkdir(parents=True, exist_ok=True)
+# ✅ Output path
+output_dir = Path("processed_split")
+if output_dir.exists():
+    shutil.rmtree(output_dir)
+output_dir.mkdir(parents=True)
 
-# Resize all to 224x224 into temp/class folders
-for cls_dir in (raw_path / "train").iterdir():
-    if not cls_dir.is_dir(): continue
-    cls_out = temp / cls_dir.name
-    cls_out.mkdir(parents=True, exist_ok=True)
-    for img_path in cls_dir.glob("*.*"):
-        if img_path.suffix.lower() not in (".jpg", ".jpeg", ".png"): continue
-        try:
-            img = Image.open(img_path).convert("RGB").resize((224,224))
-            img.save(cls_out / img_path.name)
-        except Exception as e:
-            print(f"⚠️ Skipped {img_path.name}: {e}")
+# ✅ Prepare subfolders
+splits = ['train', 'valid', 'test']
+for split in splits:
+    (output_dir / split).mkdir()
 
-# Create train/valid/test folders
-for split in ("train", "valid", "test"):
-    (out / split).mkdir(parents=True, exist_ok=True)
+# ✅ Split images (assumes subfolder per class)
+for class_dir in input_path.glob("*"):
+    if not class_dir.is_dir():
+        continue
+    images = list(class_dir.glob("*.[jp][pn]g"))
+    random.shuffle(images)
+    total = len(images)
+    train_split = int(0.8 * total)
+    val_split = int(0.9 * total)
 
-# Split and distribute
-for cls_dir in temp.iterdir():
-    images = list(cls_dir.glob("*.*"))
-    train_imgs, testval_imgs = train_test_split(images, test_size=0.2, random_state=42)
-    val_imgs, test_imgs = train_test_split(testval_imgs, test_size=0.5, random_state=42)
+    split_map = {
+        "train": images[:train_split],
+        "valid": images[train_split:val_split],
+        "test":  images[val_split:]
+    }
 
-    for split_name, split_imgs in zip(["train", "valid", "test"], [train_imgs, val_imgs, test_imgs]):
-        dest = out / split_name / cls_dir.name
-        dest.mkdir(parents=True, exist_ok=True)
-        for img in split_imgs:
-            shutil.copy(img, dest / img.name)
+    for split, imgs in split_map.items():
+        class_out = output_dir / split / class_dir.name
+        class_out.mkdir(parents=True, exist_ok=True)
+        for img_path in imgs:
+            try:
+                img = Image.open(img_path).convert("RGB").resize((224, 224))
+                img.save(class_out / img_path.name)
+            except Exception as e:
+                print(f"⚠️ Skipped {img_path.name}: {e}")
 
-shutil.rmtree(temp)
-
-# Upload as ClearML dataset
-processed = Dataset.create(dataset_name="plant_processed_data_split", dataset_project="PlantPipeline")
-processed.add_files(str(out))
-processed.upload()
-processed.finalize()
-task.close()
-print("✅ Processed dataset uploaded with train/valid/test folders.")
+# ✅ Upload split dataset to ClearML
+ds = Dataset.create(
+    dataset_name="dataset_split",                  # <--- renamed here
+    dataset_project="VisiblePipeline"
+)
+ds.add_files(str(output_dir))
+ds.upload()
+ds.finalize()
+print("✅ New dataset uploaded:", ds.id)
