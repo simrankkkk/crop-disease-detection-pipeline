@@ -1,78 +1,61 @@
-from clearml import Dataset, Task
-from sklearn.model_selection import train_test_split
-from pathlib import Path
-from PIL import Image
+from clearml import Task, Dataset
 import shutil
 import os
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+from PIL import Image
 import random
 
-# ✅ Init ClearML Task
-task = Task.init(
-    project_name="VisiblePipeline",
-    task_name="step_preprocess",
-    task_type=Task.TaskTypes.data_processing
-)
+def split_dataset(source_dir, output_dir, test_ratio=0.1, val_ratio=0.1):
+    source_dir = Path(source_dir)
+    output_dir = Path(output_dir)
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    for split in ['train', 'valid', 'test']:
+        (output_dir / split).mkdir(parents=True, exist_ok=True)
 
-# ✅ Get parameters safely
-params = task.get_parameters()
-dataset_id = params.get("dataset_task_id", "").strip()
+    for cls in os.listdir(source_dir):
+        cls_path = source_dir / cls
+        if not cls_path.is_dir():
+            continue
+        images = list(cls_path.glob("*.jpg")) + list(cls_path.glob("*.jpeg")) + list(cls_path.glob("*.png"))
+        random.shuffle(images)
 
-# ✅ Fallback if no param provided
-if not dataset_id:
-    # Set your fallback dataset ID here (e.g., from step_upload)
-    dataset_id = "105163c10d0a4bbaa06055807084ec71"
-    print(f"⚠️ Using fallback dataset ID: {dataset_id}")
-else:
-    print(f"✅ Using pipeline-provided dataset ID: {dataset_id}")
+        test_size = int(len(images) * test_ratio)
+        val_size = int(len(images) * val_ratio)
+        test_files = images[:test_size]
+        val_files = images[test_size:test_size + val_size]
+        train_files = images[test_size + val_size:]
 
-# ✅ Load dataset
-dataset = Dataset.get(dataset_id=dataset_id)
-input_path = Path(dataset.get_local_copy())
-print("📂 Raw dataset located at:", input_path)
+        for split_name, files in zip(['train', 'valid', 'test'], [train_files, val_files, test_files]):
+            dest_dir = output_dir / split_name / cls
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            for file in files:
+                try:
+                    img = Image.open(file).convert("RGB")
+                    img.save(dest_dir / file.name)
+                except Exception as e:
+                    print(f"⚠️ Could not process {file}: {e}")
 
-# ✅ Output path
-output_dir = Path("processed_split")
-if output_dir.exists():
-    shutil.rmtree(output_dir)
-output_dir.mkdir(parents=True)
+    # Debug print: file counts
+    for split in ['train', 'valid', 'test']:
+        count = len(list((output_dir / split).rglob("*.jpg")))
+        print(f"✅ {split} contains {count} images")
 
-# ✅ Prepare subfolders
-splits = ['train', 'valid', 'test']
-for split in splits:
-    (output_dir / split).mkdir()
+if __name__ == "__main__":
+    task = Task.init(project_name="VisiblePipeline", task_name="step_preprocess", task_type=Task.TaskTypes.data_processing)
 
-# ✅ Split images (assumes subfolder per class)
-for class_dir in input_path.glob("*"):
-    if not class_dir.is_dir():
-        continue
-    images = list(class_dir.glob("*.[jp][pn]g"))
-    random.shuffle(images)
-    total = len(images)
-    train_split = int(0.8 * total)
-    val_split = int(0.9 * total)
+    dataset_id = Task.current_task().get_parameters_as_dict().get("General/dataset_task_id")
+    print("🔍 Getting dataset ID:", dataset_id)
 
-    split_map = {
-        "train": images[:train_split],
-        "valid": images[train_split:val_split],
-        "test":  images[val_split:]
-    }
+    raw_dataset = Dataset.get(dataset_id=dataset_id)
+    source_path = raw_dataset.get_local_copy()
 
-    for split, imgs in split_map.items():
-        class_out = output_dir / split / class_dir.name
-        class_out.mkdir(parents=True, exist_ok=True)
-        for img_path in imgs:
-            try:
-                img = Image.open(img_path).convert("RGB").resize((224, 224))
-                img.save(class_out / img_path.name)
-            except Exception as e:
-                print(f"⚠️ Skipped {img_path.name}: {e}")
+    output_dir = "processed_split"
+    split_dataset(source_path, output_dir)
 
-# ✅ Upload split dataset to ClearML
-ds = Dataset.create(
-    dataset_name="dataset_split",
-    dataset_project="VisiblePipeline"
-)
-ds.add_files(str(output_dir))
-ds.upload()
-ds.finalize()
-print("✅ New dataset uploaded with ID:", ds.id)
+    ds = Dataset.create(dataset_name="dataset_split", dataset_project="VisiblePipeline")
+    ds.add_files(output_dir)
+    ds.upload()
+    ds.finalize()
+    print("✅ Dataset split and uploaded successfully.")
