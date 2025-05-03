@@ -1,15 +1,14 @@
-from clearml import Task, Dataset
+from clearml import Dataset, Task
 
-def step1():
-    # Initialize ClearML Task
-    Task.init(project_name="PlantPipeline", task_name="Step 1 - Load Dataset")
+# ✅ Init task under new project
+Task.init(
+    project_name="VisiblePipeline",
+    task_name="Step 1 - Upload Raw Dataset",
+    task_type=Task.TaskTypes.data_processing
+)
 
-    # Load dataset by ID
-    dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
-    local_path = dataset.get_local_copy()
+# ✅ Replace this with your actual dataset ID (or create new one if needed)
+dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
 
-    print("✅ Dataset path:", local_path)
-    return local_path
-
-if __name__ == "__main__":
-    step1()
+local_path = dataset.get_local_copy()
+print("✅ Dataset successfully fetched to local path:", local_path)
