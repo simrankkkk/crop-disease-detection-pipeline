@@ -23,10 +23,10 @@ pipe.add_step(
 )
 
 pipe.add_step(
-    name="step_train",
+    name="step_train_fast",
     parents=["step_to_preprocess"],
     base_task_project="VisiblePipeline",
-    base_task_name="step_to_train",
+    base_task_name="step_train_fast",
     parameter_override={
         "args.dataset_id": "${step_preprocess.OUTPUT_DATASET_ID}"
     }
