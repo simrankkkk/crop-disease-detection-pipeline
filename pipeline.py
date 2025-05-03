@@ -35,4 +35,5 @@ pipe.add_step(
     }
 )
 
-pipe.start()
+pipe.start(queue="default")
+
