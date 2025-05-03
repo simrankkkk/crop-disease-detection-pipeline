@@ -1,80 +1,77 @@
+from clearml import Task, Dataset
 import os
 import shutil
 import random
-from clearml import Task, Dataset
+from collections import defaultdict
 
-# ✅ ClearML Task Init
+# Connect to ClearML
 task = Task.init(project_name="VisiblePipeline", task_name="step_preprocess", task_type=Task.TaskTypes.data_processing)
-logger = task.get_logger()
 
-# ✅ Dataset Retrieval
+# Set dataset ID (your final version)
 DATASET_ID = "105163c10d0a4bbaa06055807084ec71"
-dataset = Dataset.get(dataset_id=DATASET_ID)
-local_dataset_path = dataset.get_local_copy()
 
-# ✅ Output Directory
-output_dir = os.path.join(local_dataset_path, "..", "plant_processed_split")
+# Download dataset
+dataset = Dataset.get(dataset_id=DATASET_ID)
+dataset_path = dataset.get_local_copy()
+
+# Output path
+output_dir = "./split_dataset"
+train_dir = os.path.join(output_dir, "train")
+val_dir = os.path.join(output_dir, "val")
+test_dir = os.path.join(output_dir, "test")
+
+# Clean previous runs
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
-os.makedirs(output_dir)
 
-# ✅ Split Ratios
-train_ratio, val_ratio, test_ratio = 0.7, 0.15, 0.15
-random.seed(42)
+# Create directories
+for split in [train_dir, val_dir, test_dir]:
+    os.makedirs(split, exist_ok=True)
 
-# ✅ Loop over class folders
-for class_name in os.listdir(local_dataset_path):
-    class_path = os.path.join(local_dataset_path, class_name)
-    if not os.path.isdir(class_path):
-        continue
+# Group images by class from `train/` folder inside dataset
+class_to_images = defaultdict(list)
+source_train_dir = os.path.join(dataset_path, "train")
 
-    files = [f for f in os.listdir(class_path) if os.path.isfile(os.path.join(class_path, f))]
-    total = len(files)
-    if total == 0:
-        continue
+for root, _, files in os.walk(source_train_dir):
+    for file in files:
+        if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+            label = os.path.basename(root)
+            class_to_images[label].append(os.path.join(root, file))
 
-    random.shuffle(files)
-    train_count = max(1, int(total * train_ratio))
-    val_count = max(1, int(total * val_ratio)) if total >= 7 else 0
-    test_count = total - train_count - val_count
+# Split and copy
+split_counts = {"train": defaultdict(int), "val": defaultdict(int), "test": defaultdict(int)}
+for label, images in class_to_images.items():
+    random.shuffle(images)
+    n = len(images)
+    n_train = int(0.8 * n)
+    n_val = int(0.1 * n)
 
-    # Adjust if too much
-    if train_count + val_count + test_count > total:
-        train_count -= (train_count + val_count + test_count - total)
-
-    splits = {
-        "train": files[:train_count],
-        "val": files[train_count:train_count + val_count],
-        "test": files[train_count + val_count:]
+    split_map = {
+        "train": images[:n_train],
+        "val": images[n_train:n_train + n_val],
+        "test": images[n_train + n_val:]
     }
 
-    for split_name, split_files in splits.items():
-        split_dir = os.path.join(output_dir, split_name, class_name)
-        os.makedirs(split_dir, exist_ok=True)
-        for f in split_files:
-            shutil.copy(os.path.join(class_path, f), os.path.join(split_dir, f))
+    for split, img_list in split_map.items():
+        split_label_dir = os.path.join(output_dir, split, label)
+        os.makedirs(split_label_dir, exist_ok=True)
+        for img_path in img_list:
+            shutil.copy(img_path, os.path.join(split_label_dir, os.path.basename(img_path)))
+            split_counts[split][label] += 1
 
-        # ✅ Log per split
-        log_line = f"{split_name.upper()} - {class_name}: {len(split_files)} images"
-        print(log_line)
-        logger.report_text(log_line)
+# ✅ Print class counts
+print("\nImage count per class per split:")
+for split in split_counts:
+    print(f"\n{split.upper()}:")
+    for label, count in split_counts[split].items():
+        print(f"  {label}: {count} images")
 
-    # ✅ Log total per class
-    summary_line = f"{class_name} TOTAL: {total} → Train: {len(splits['train'])}, Val: {len(splits['val'])}, Test: {len(splits['test'])}"
-    print(summary_line)
-    logger.report_text(summary_line)
-
-# ✅ Upload to ClearML
-output_dataset = Dataset.create(
+# Upload split dataset
+new_dataset = Dataset.create(
     dataset_name="plant_processed_data_split",
     dataset_project="VisiblePipeline",
-    parent_datasets=[dataset.id],
+    parent_datasets=[dataset.id]
 )
-output_dataset.add_files(output_dir)
-output_dataset.upload()
-output_dataset.finalize()
-
-logger.report_text("✅ Dataset successfully split and uploaded.")
+new_dataset.add_files(path=output_dir)
+new_dataset.finalize()
 print("✅ Dataset successfully split and uploaded.")
-
-task.close()
