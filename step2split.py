@@ -1,4 +1,3 @@
-# step2split.py — Updated to avoid KeyError on 'General'
 from clearml import Dataset, Task
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -8,15 +7,25 @@ import os
 import random
 
 # ✅ Init ClearML Task
-Task.init(
+task = Task.init(
     project_name="VisiblePipeline",
     task_name="step_preprocess",
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Fetch raw dataset passed from step1
-params = Task.current_task().get_parameters()
-dataset_id = params.get("dataset_task_id")
+# ✅ Get parameters safely
+params = task.get_parameters()
+dataset_id = params.get("dataset_task_id", "").strip()
+
+# ✅ Fallback if no param provided
+if not dataset_id:
+    # Set your fallback dataset ID here (e.g., from step_upload)
+    dataset_id = "105163c10d0a4bbaa06055807084ec71"
+    print(f"⚠️ Using fallback dataset ID: {dataset_id}")
+else:
+    print(f"✅ Using pipeline-provided dataset ID: {dataset_id}")
+
+# ✅ Load dataset
 dataset = Dataset.get(dataset_id=dataset_id)
 input_path = Path(dataset.get_local_copy())
 print("📂 Raw dataset located at:", input_path)
@@ -60,10 +69,10 @@ for class_dir in input_path.glob("*"):
 
 # ✅ Upload split dataset to ClearML
 ds = Dataset.create(
-    dataset_name="dataset_split",                  # <--- renamed here
+    dataset_name="dataset_split",
     dataset_project="VisiblePipeline"
 )
 ds.add_files(str(output_dir))
 ds.upload()
 ds.finalize()
-print("✅ New dataset uploaded:", ds.id)
+print("✅ New dataset uploaded with ID:", ds.id)
