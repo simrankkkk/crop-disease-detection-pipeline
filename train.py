@@ -14,7 +14,7 @@ dataset_id = sys.argv[1] if len(sys.argv) > 1 else None
 assert dataset_id, "❌ Dataset ID must be provided"
 
 # Task init
-task = Task.init(project_name="VisiblePipeline", task_name="step_train")
+task = Task.init(project_name="VisiblePipeline", task_name="step_to_train")
 logger = task.get_logger()
 
 dataset = Dataset.get(dataset_id=dataset_id)
