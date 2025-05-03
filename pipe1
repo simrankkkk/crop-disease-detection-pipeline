@@ -1,7 +1,7 @@
 # step1.py — Upload original dataset and print dataset ID
 from clearml import Dataset, Task
 
-task = Task.init(project_name="VisiblePipeline", task_name="step_upload")
+task = Task.init(project_name="VisiblePipeline", task_name="step_to_upload")
 print("🔗 Connected to ClearML")
 
 # Load dataset (already uploaded manually once, so just get it again)
