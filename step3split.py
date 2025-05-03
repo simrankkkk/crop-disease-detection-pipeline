@@ -1,3 +1,13 @@
+import subprocess
+import sys
+
+# Auto-install seaborn if missing
+try:
+    import seaborn as sns
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
+    import seaborn as sns
+    
 from clearml import Task, Dataset
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
@@ -6,15 +16,6 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.metrics import classification_report, confusion_matrix
 import os, numpy as np, pickle, matplotlib.pyplot as plt, seaborn as sns
-import subprocess
-import sys
-
-# Auto-install seaborn if not available
-try:
-    import seaborn as sns
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
-    import seaborn as sns
 
 # Connect to ClearML
 task = Task.init(project_name="VisiblePipeline", task_name="step_train")
