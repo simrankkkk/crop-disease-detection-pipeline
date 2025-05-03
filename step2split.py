@@ -1,3 +1,4 @@
+# step2split.py — Updated to avoid KeyError on 'General'
 from clearml import Dataset, Task
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -14,7 +15,9 @@ Task.init(
 )
 
 # ✅ Fetch raw dataset passed from step1
-dataset = Dataset.get(dataset_id=Task.current_task().get_parameters_as_dict()["General"]["dataset_task_id"])
+params = Task.current_task().get_parameters()
+dataset_id = params.get("dataset_task_id")
+dataset = Dataset.get(dataset_id=dataset_id)
 input_path = Path(dataset.get_local_copy())
 print("📂 Raw dataset located at:", input_path)
 
