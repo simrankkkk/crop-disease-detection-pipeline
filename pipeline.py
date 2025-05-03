@@ -9,7 +9,8 @@ pipe = PipelineController(
 pipe.add_step(
     name="step_upload",
     base_task_project="VisiblePipeline",
-    base_task_name="step_upload"
+    base_task_name="step_upload",
+    execution_queue="default"
 )
 
 pipe.add_step(
@@ -17,6 +18,7 @@ pipe.add_step(
     parents=["step_upload"],
     base_task_project="VisiblePipeline",
     base_task_name="step_preprocess",
+    execution_queue="default",
     parameter_override={
         "Args/dataset_id": "${step_upload.id}"
     }
@@ -27,9 +29,10 @@ pipe.add_step(
     parents=["step_preprocess"],
     base_task_project="VisiblePipeline",
     base_task_name="step_train",
+    execution_queue="default",
     parameter_override={
         "Args/dataset_id": "${step_preprocess.id}"
     }
 )
 
-pipe.start(queue="default")
+pipe.start()
