@@ -16,7 +16,7 @@ pipe.add_step(
     name="step_preprocess",
     parents=["step_to_upload"],
     base_task_project="VisiblePipeline",
-    base_task_name="step_to_preprocess",
+    base_task_name="step_preprocess",
     parameter_override={
         "args.dataset_id": "${step_upload.OUTPUT_DATASET_ID}"
     }
