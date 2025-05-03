@@ -33,7 +33,7 @@ test_dir = os.path.join(dataset_path, "test")
 # Load image datasets
 IMAGE_SIZE = (160, 160)
 BATCH_SIZE = 32
-EPOCHS = 10
+EPOCHS = 5
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(train_dir, image_size=IMAGE_SIZE, batch_size=BATCH_SIZE, shuffle=True)
 val_ds   = tf.keras.preprocessing.image_dataset_from_directory(val_dir,   image_size=IMAGE_SIZE, batch_size=BATCH_SIZE, shuffle=False)
