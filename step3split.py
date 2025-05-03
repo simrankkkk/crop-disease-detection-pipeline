@@ -1,3 +1,4 @@
+
 import subprocess
 import sys
 
@@ -7,15 +8,15 @@ try:
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
     import seaborn as sns
-    
+
 from clearml import Task, Dataset
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
 from tensorflow.keras import layers, models, Input
 from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.metrics import classification_report, confusion_matrix
-import os, numpy as np, pickle, matplotlib.pyplot as plt, seaborn as sns
+import os, numpy as np, pickle, matplotlib.pyplot as plt
 
 # Connect to ClearML
 task = Task.init(project_name="VisiblePipeline", task_name="step_train")
@@ -68,10 +69,9 @@ model.summary()
 # Callbacks
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
-earlystop_cb = EarlyStopping(patience=5, restore_best_weights=True, monitor="val_accuracy", mode="max")
 
 # Train
-history = model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS, callbacks=[checkpoint_cb, earlystop_cb])
+history = model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS, callbacks=[checkpoint_cb])
 
 # Save models and history
 model.save("outputs/final_model.h5")
