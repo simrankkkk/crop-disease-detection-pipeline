@@ -1,32 +1,20 @@
 from clearml import Task
-from clearml.automation import UniformParameterRange, HyperParameterOptimizer, HyperParameter
+from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 
 # ✅ Init task
 task = Task.init(project_name="VisiblePipeline", task_name="stage_hpo")
 
-# ✅ Completed base training task ID
+# ✅ Base task (completed training job)
 base_task_id = "a9b6d3291e6846c1800476aabb057b06"
 
-# ✅ Define hyperparameter space properly using HyperParameter objects
-param_ranges = [
-    HyperParameter(
-        name="General/learning_rate",
-        type=HyperParameter.Type.Float,
-        range=UniformParameterRange(name="learning_rate", min_value=0.0001, max_value=0.01)
-    ),
-    HyperParameter(
-        name="General/dropout",
-        type=HyperParameter.Type.Float,
-        range=UniformParameterRange(name="dropout", min_value=0.3, max_value=0.5)
-    ),
-    HyperParameter(
-        name="General/dense_units",
-        type=HyperParameter.Type.Integer,
-        range=UniformParameterRange(name="dense_units", min_value=128, max_value=512)
-    ),
-]
+# ✅ Use basic dict-style hyperparameter config
+param_ranges = {
+    "General/learning_rate": UniformParameterRange(0.0001, 0.01),
+    "General/dropout": UniformParameterRange(0.3, 0.5),
+    "General/dense_units": UniformParameterRange(128, 512),
+}
 
-# ✅ Create optimizer
+# ✅ Set up the optimizer
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=param_ranges,
@@ -42,14 +30,14 @@ optimizer = HyperParameterOptimizer(
     clone_base_task_name_suffix="HPO_Trial"
 )
 
-# ✅ Print best result summary
+# ✅ Print best result
 def print_best_result(hpo):
     best_task = hpo.get_best_task()
     if not best_task:
         print("❌ No best task found.")
         return
 
-    print("\\n🏆 BEST TASK ID:", best_task.id)
+    print("\n🏆 BEST TASK ID:", best_task.id)
     val_acc = (
         best_task.get_last_scalar_metrics()
         .get("accuracy", {})
@@ -63,9 +51,7 @@ def print_best_result(hpo):
         if any(h in key for h in ["learning_rate", "dropout", "dense_units"]):
             print(f"   - {key}: {value}")
 
-# ✅ Launch optimization
+# ✅ Run it
 optimizer.set_report_period(1)
 optimizer.start()
-
-# ✅ Final summary
 print_best_result(optimizer)
