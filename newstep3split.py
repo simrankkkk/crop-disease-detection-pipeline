@@ -10,6 +10,9 @@ from tensorflow.keras import layers, models, Input, optimizers
 from tensorflow.keras.callbacks import ModelCheckpoint
 import seaborn as sns
 
+class_names = None
+num_classes = None
+
 # ─── 1. Tunables & quick‑test flags ──────────────────────────────────────
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr',            type=float, default=1e-3,  help='Learning rate')
@@ -33,18 +36,26 @@ dataset = Dataset.get(
 root = dataset.get_local_copy()
 dirs = {k: os.path.join(root, k) for k in ['train', 'valid', 'test']}
 
+# 🔄 REPLACE the make_ds helper with this version
 def make_ds(split):
-    ds = tf.keras.preprocessing.image_dataset_from_directory(
+    full_ds = tf.keras.preprocessing.image_dataset_from_directory(
         dirs[split],
         image_size=(160, 160),
         batch_size=args.batch_size,
         shuffle=(split == 'train')
     )
-    ds = ds.prefetch(tf.data.AUTOTUNE)
+    # save class names only once (they’re identical for every split)
+    global class_names, num_classes
+    if class_names is None:
+        class_names = full_ds.class_names
+        num_classes = len(class_names)
+
+    # down‑sample if requested
     if 0 < args.subset_ratio < 1.0:
-        n = tf.data.experimental.cardinality(ds).numpy()
-        ds = ds.take(int(n * args.subset_ratio))
-    return ds
+        n = tf.data.experimental.cardinality(full_ds).numpy()
+        full_ds = full_ds.take(int(n * args.subset_ratio))
+
+    return full_ds.prefetch(tf.data.AUTOTUNE)
 
 train_ds = make_ds('train')
 val_ds   = make_ds('valid')
