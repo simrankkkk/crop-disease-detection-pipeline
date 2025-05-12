@@ -1,14 +1,14 @@
 # ClearML SDK for experiment + pipeline orchestration
 clearml>=1.18.0
-seaborn==0.11.2
+
+# ✅ Seaborn + matplotlib version compatibility
+seaborn==0.12.2
+matplotlib==3.7.1
 
 # Core ML & data handling
-tensorflow>=2.8.0        # matches your use of tf.keras (MobileNetV2, DenseNet121, hybrid)
-numpy>=1.21.0            # for history arrays, concatenation, etc.
-scikit-learn>=1.0.0      # for any metrics or preprocessing you might add
+tensorflow>=2.8.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
 
 # Image I/O
-opencv-python>=4.5.0     # your load/resize/augment via cv2
-
-# Plotting (if you surface any plots)
-matplotlib>=3.4.0
+opencv-python>=4.5.0
