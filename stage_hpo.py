@@ -1,62 +1,62 @@
+#!/usr/bin/env python
+"""
+step_hpo.py  –  ClearML Hyper‑Parameter Optimiser controller
+Quick test: searches lr, batch_size, dropout in 8 trials
+Outputs best_params.json as an artifact.
+"""
+
 from clearml import Task
-from clearml.automation import HyperParameterOptimizer, UniformParameterRange
+from clearml.automation.opt import (
+    HyperParameterOptimizer,
+    UniformParameterRange,
+    DiscreteParameterRange
+)
+import argparse, json, pathlib
 
-# 1) Initialize the HPO controller task
-task = Task.init(project_name="VisiblePipeline", task_name="stage_hpo")
+# ----------------------------------------------------------------------
+# 1. CLI: we just need the Task‑ID of the baseline step_train run
+# ----------------------------------------------------------------------
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--base_task_id', required=True,
+    help='Task‑ID of the completed step_train run to clone'
+)
+args = parser.parse_args()
 
-# 2) ID of the completed stage_train_hpo_3 task to clone
-base_task_id = "36b276d5f8bc4e6b9e3ac311b63723a2"
+task = Task.init(project_name="VisiblePipeline", task_name="step_hpo")
 
-# 3) Define your search space as a list of UniformParameterRange objects
-hyper_params = [
-    UniformParameterRange(name="General/learning_rate", min_value=0.0001, max_value=0.01),
-    UniformParameterRange(name="General/dropout",         min_value=0.3,    max_value=0.5),
-    UniformParameterRange(name="General/dense_units",    min_value=128,    max_value=512),
+# ----------------------------------------------------------------------
+# 2. Define a SMALL search space for the smoke test
+#    (expand later once everything wires up)
+# ----------------------------------------------------------------------
+param_space = [
+    UniformParameterRange('lr',          min_value=1e-4, max_value=1e-2, log_scale=True),
+    DiscreteParameterRange('batch_size', values=[16, 32, 64]),
+    DiscreteParameterRange('dropout',    values=[0.3, 0.4, 0.5]),
 ]
 
-# 4) Configure the optimizer
 optimizer = HyperParameterOptimizer(
-    base_task_id=base_task_id,
-    hyper_parameters=hyper_params,
-    objective_metric_title="accuracy",
-    objective_metric_series="val_accuracy",
-    objective_metric_sign="max",
-    max_iteration=8,                  # total number of trials
-    total_max_jobs=8,
-    min_iteration_per_job=1,
-    max_iteration_per_job=1,
-    save_top_k_tasks_only=1,          # keep only the best trial
-    execution_queue="default",
-    clone_base_task_name_suffix="HPO_Trial"
+    base_task_id=args.base_task_id,              # clone trained task
+    hyper_parameters=param_space,
+    objective_metric_title='val_accuracy',
+    objective_metric_sign='max',
+    max_total_number_of_configs=8,               # quick test (expand later)
+    max_number_of_concurrent_tasks=2,           # ↔ number of free workers
+    optimizer_class='random_search',
+    execute_queue='default',                    # your training queue
 )
 
-# 5) Run HPO
-optimizer.set_report_period(1)  # seconds between status logs
-optimizer.start()
+# ----------------------------------------------------------------------
+# 3. Launch search – this blocks until all trials finish
+# ----------------------------------------------------------------------
+best_params = optimizer.start()
 
-# 6) Retrieve & print the best trial
-best_tasks = HyperParameterOptimizer.get_optimizer_top_experiments(
-    objective_metric_title="accuracy",
-    objective_metric_series="val_accuracy",
-    objective_metric_sign="max",
-    optimizer_task_id=task.id,
-    top_k=1
-)
-if not best_tasks:
-    print("❌ No HPO trials completed successfully.")
-    exit(1)
+# ----------------------------------------------------------------------
+# 4. Save / upload best params so the pipeline can re‑use them
+# ----------------------------------------------------------------------
+path = pathlib.Path('best_params.json')
+path.write_text(json.dumps(best_params, indent=2))
+task.upload_artifact(name='best_params', artifact_object=str(path))
 
-best = best_tasks[0]
-print(f"🏆 BEST TASK ID: {best.id}")
-
-# 7) Print its validation accuracy
-metrics = best.get_last_scalar_metrics()
-val_acc = metrics.get("accuracy", {}).get("val_accuracy", {}).get("value", "N/A")
-print(f"📈 Best Validation Accuracy: {val_acc}")
-
-# 8) Print the best hyperparameters
-params = best.get_parameters()
-print("📊 Best Hyperparameters:")
-print(f"   • General/learning_rate: {params.get('General/learning_rate')}")
-print(f"   • General/dropout:       {params.get('General/dropout')}")
-print(f"   • General/dense_units:    {params.get('General/dense_units')}")
+task.close()
+print("✅ HPO finished, best params saved.")
