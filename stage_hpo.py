@@ -1,26 +1,26 @@
 from clearml import Task
-from clearml.automation import UniformParameterRange, HyperParameterOptimizer
+from clearml.automation import HyperParameterOptimizer, UniformParameterRange
 
-# ✅ Init task
+# ✅ Init the HPO task
 task = Task.init(project_name="VisiblePipeline", task_name="stage_hpo")
 
-# ✅ Base task (completed training job)
+# ✅ Use your base training task that already completed
 base_task_id = "a9b6d3291e6846c1800476aabb057b06"
 
-# ✅ Use basic dict-style hyperparameter config
+# ✅ Define the hyperparameter space (use named args!)
 param_ranges = {
-    "General/learning_rate": UniformParameterRange(0.0001, 0.01),
-    "General/dropout": UniformParameterRange(0.3, 0.5),
-    "General/dense_units": UniformParameterRange(128, 512),
+    "General/learning_rate": UniformParameterRange(min_value=0.0001, max_value=0.01),
+    "General/dropout": UniformParameterRange(min_value=0.3, max_value=0.5),
+    "General/dense_units": UniformParameterRange(min_value=128, max_value=512),
 }
 
-# ✅ Set up the optimizer
+# ✅ Set up the optimizer (uses val_accuracy as metric)
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=param_ranges,
     objective_metric_title="accuracy",
     objective_metric_series="val_accuracy",
-    objective_metric_sign="max",
+    objective_metric_sign="max",  # maximize val_accuracy
     max_iteration=8,
     total_max_jobs=8,
     min_iteration_per_job=1,
@@ -30,7 +30,7 @@ optimizer = HyperParameterOptimizer(
     clone_base_task_name_suffix="HPO_Trial"
 )
 
-# ✅ Print best result
+# ✅ Callback to print the best trial summary
 def print_best_result(hpo):
     best_task = hpo.get_best_task()
     if not best_task:
@@ -47,11 +47,11 @@ def print_best_result(hpo):
     print(f"📈 Best Validation Accuracy: {val_acc}")
 
     print("📊 Best Hyperparameters:")
-    for key, value in best_task.get_parameters().items():
-        if any(h in key for h in ["learning_rate", "dropout", "dense_units"]):
-            print(f"   - {key}: {value}")
+    for k, v in best_task.get_parameters().items():
+        if any(h in k for h in ["learning_rate", "dropout", "dense_units"]):
+            print(f"   - {k}: {v}")
 
-# ✅ Run it
+# ✅ Launch optimization
 optimizer.set_report_period(1)
 optimizer.start()
 print_best_result(optimizer)
