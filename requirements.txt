@@ -1,14 +1,8 @@
-# ClearML SDK for experiment + pipeline orchestration
-clearml>=1.18.0
-
-# ✅ Seaborn + matplotlib version compatibility
-seaborn==0.12.2
-matplotlib==3.7.1
-
-# Core ML & data handling
-tensorflow>=2.8.0
-numpy>=1.21.0
-scikit-learn>=1.0.0
-
-# Image I/O
-opencv-python>=4.5.0
+numpy==2.2.5
+tensorflow==2.19.0
+keras==3.9.2
+matplotlib==3.10.1
+seaborn==0.13.2
+clearml==1.18.0
+scikit-learn==1.6.1
+opencv-python==4.11.0.86
