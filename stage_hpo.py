@@ -1,23 +1,26 @@
 from clearml import Task
 from clearml.automation import HyperParameterOptimizer, UniformParameterRange
 
-# ✅ Start ClearML HPO controller task
+# ✅ Start task
 task = Task.init(project_name="VisiblePipeline", task_name="stage_hpo")
 
-# ✅ Base training task (completed one)
+# ✅ Base task to clone
 base_task_id = "a9b6d3291e6846c1800476aabb057b06"
 
-# ✅ Define ranges using proper UniformParameterRange structure (with name)
-param_ranges = {
-    "General/learning_rate": UniformParameterRange(name="General/learning_rate", min_value=0.0001, max_value=0.01),
-    "General/dropout": UniformParameterRange(name="General/dropout", min_value=0.3, max_value=0.5),
-    "General/dense_units": UniformParameterRange(name="General/dense_units", min_value=128, max_value=512),
-}
+# ✅ Build as a list of tuples — this is the exact format ClearML expects
+param_ranges = [
+    ("General/learning_rate", UniformParameterRange(name="General/learning_rate", min_value=0.0001, max_value=0.01)),
+    ("General/dropout", UniformParameterRange(name="General/dropout", min_value=0.3, max_value=0.5)),
+    ("General/dense_units", UniformParameterRange(name="General/dense_units", min_value=128, max_value=512)),
+]
 
-# ✅ Create optimizer object
+# ✅ Convert to dict using to_dict manually
+param_dict = {name: obj.to_dict() for name, obj in param_ranges}
+
+# ✅ Set up the optimizer
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
-    hyper_parameters=param_ranges,
+    hyper_parameters=param_dict,
     objective_metric_title="accuracy",
     objective_metric_series="val_accuracy",
     objective_metric_sign="max",
@@ -30,7 +33,7 @@ optimizer = HyperParameterOptimizer(
     clone_base_task_name_suffix="HPO_Trial"
 )
 
-# ✅ Print best result
+# ✅ Best result logging
 def print_best_result(hpo):
     best_task = hpo.get_best_task()
     if not best_task:
@@ -49,7 +52,7 @@ def print_best_result(hpo):
         if any(h in k for h in ["learning_rate", "dropout", "dense_units"]):
             print(f"   - {k}: {v}")
 
-# ✅ Run HPO
+# ✅ Run
 optimizer.set_report_period(1)
 optimizer.start()
 print_best_result(optimizer)
