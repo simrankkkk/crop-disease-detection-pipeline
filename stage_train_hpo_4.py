@@ -10,7 +10,7 @@ logger = task.get_logger()
 
 # ─── 2) Fetch & Register Hyperparameters ────────────────────────────────────────
 # Default values: subset 100%, 2 epochs (you can override via pipeline or HPO)
-subset_ratio = float(task.get_parameter("General/subset_ratio", 1.0))
+subset_ratio = float(task.get_parameter("General/subset_ratio", 0.1))
 learning_rate = float(task.get_parameter("General/learning_rate", 0.001))
 dropout_rate = float(task.get_parameter("General/dropout", 0.4))
 dense_units = int(task.get_parameter("General/dense_units", 256))
