@@ -1,12 +1,3 @@
-import subprocess
-import sys
-
-# Auto-install seaborn if missing
-try:
-    import seaborn as sns
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
-    import seaborn as sns
 from clearml import Task, Dataset
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
@@ -15,22 +6,27 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.metrics import classification_report, confusion_matrix
 import os, numpy as np, pickle, matplotlib.pyplot as plt
+import subprocess
+import sys
+
+# ✅ Fix matplotlib + seaborn compatibility
+subprocess.check_call([sys.executable, "-m", "pip", "install", "matplotlib==3.7.1", "seaborn==0.12.2"])
 import seaborn as sns
 
 # Init ClearML task
 task = Task.init(project_name="VisiblePipeline", task_name="stage_train_hpo_3")
 logger = task.get_logger()
 
-# Load dataset from ClearML
+# Load dataset
 dataset = Dataset.get(dataset_name="plant_processed_data_split", dataset_project="VisiblePipeline", only_completed=True)
 dataset_path = dataset.get_local_copy()
 
-# Define dataset paths
+# Dataset paths
 train_dir = os.path.join(dataset_path, "train")
 val_dir   = os.path.join(dataset_path, "valid")
 test_dir  = os.path.join(dataset_path, "test")
 
-# Load datasets
+# Load image datasets
 IMAGE_SIZE = (160, 160)
 BATCH_SIZE = 32
 EPOCHS = 5
@@ -39,8 +35,8 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(train_dir, image_
 val_ds   = tf.keras.preprocessing.image_dataset_from_directory(val_dir, image_size=IMAGE_SIZE, batch_size=BATCH_SIZE)
 test_ds  = tf.keras.preprocessing.image_dataset_from_directory(test_dir, image_size=IMAGE_SIZE, batch_size=BATCH_SIZE)
 
-# Optional: Use only a subset of data for faster training
-subset_ratio = float(task.get_parameter("General/subset_ratio", 1.0))  # e.g. 0.1 for 10%
+# Optional: subset for faster testing
+subset_ratio = float(task.get_parameter("General/subset_ratio", 1.0))  # e.g. 0.1 = 10%
 
 def subset_dataset(dataset, ratio):
     total = tf.data.experimental.cardinality(dataset).numpy()
@@ -49,7 +45,6 @@ def subset_dataset(dataset, ratio):
 train_ds = subset_dataset(train_ds, subset_ratio)
 val_ds   = subset_dataset(val_ds, subset_ratio)
 
-# Class info
 class_names = train_ds.class_names
 num_classes = len(class_names)
 
@@ -57,16 +52,15 @@ train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
 val_ds   = val_ds.prefetch(tf.data.AUTOTUNE)
 test_ds  = test_ds.prefetch(tf.data.AUTOTUNE)
 
-# Get hyperparameters from ClearML
+# Get hyperparameters
 lr = float(task.get_parameter("General/learning_rate", 0.001))
 dropout = float(task.get_parameter("General/dropout", 0.4))
 dense_units = int(task.get_parameter("General/dense_units", 256))
 
-# Build hybrid model
+# Build model
 inp = Input(shape=(160, 160, 3))
 mobilenet = MobileNetV2(include_top=False, weights='imagenet', input_tensor=inp)
 mobilenet.trainable = True
-
 densenet = DenseNet121(include_top=False, weights='imagenet', input_tensor=inp)
 densenet.trainable = False
 
@@ -79,15 +73,14 @@ x = layers.Dropout(dropout)(x)
 out = layers.Dense(num_classes, activation='softmax')(x)
 
 model = Model(inputs=inp, outputs=out)
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), 
-              loss='sparse_categorical_crossentropy', 
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
+              loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# Callbacks
+# Train
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
 
-# Train model
 history = model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS, callbacks=[checkpoint_cb])
 model.save("outputs/final_model.h5")
 
@@ -99,7 +92,7 @@ task.upload_artifact("final_model", artifact_object="outputs/final_model.h5")
 task.upload_artifact("best_model", artifact_object="outputs/best_model.h5")
 task.upload_artifact("training_history", artifact_object="outputs/train_history.pkl")
 
-# Evaluate on test set
+# Evaluation
 y_true = np.concatenate([y.numpy() for x, y in test_ds])
 y_pred_probs = model.predict(test_ds)
 y_pred = np.argmax(y_pred_probs, axis=1)
@@ -117,7 +110,7 @@ plt.ylabel("Actual")
 plt.savefig("outputs/confusion_matrix.png")
 task.upload_artifact("confusion_matrix", artifact_object="outputs/confusion_matrix.png")
 
-# Accuracy/loss plots
+# Training curves
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
 plt.plot(history.history['accuracy'], label="Train Acc")
