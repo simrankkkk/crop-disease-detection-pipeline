@@ -9,10 +9,14 @@ base_task_id = "a9b6d3291e6846c1800476aabb057b06"  # completed stage_train_hpo_3
 
 # ✅ Define hyperparameter search space using correct argument names
 param_ranges = {
-    "General/learning_rate": UniformParameterRange(min_value=0.0001, max_value=0.01),
-    "General/dropout": UniformParameterRange(min_value=0.3, max_value=0.5),
-    "General/dense_units": UniformParameterRange(min_value=128, max_value=512),
+    "General/learning_rate": UniformParameterRange(
+        name="learning_rate", min_value=0.0001, max_value=0.01),
+    "General/dropout": UniformParameterRange(
+        name="dropout", min_value=0.3, max_value=0.5),
+    "General/dense_units": UniformParameterRange(
+        name="dense_units", min_value=128, max_value=512),
 }
+
 
 # ✅ Create the HPO optimizer
 optimizer = HyperParameterOptimizer(
