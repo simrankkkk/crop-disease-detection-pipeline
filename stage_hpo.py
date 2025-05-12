@@ -1,23 +1,23 @@
 from clearml import Task
 from clearml.automation import HyperParameterOptimizer, UniformParameterRange
 
-# ✅ Initialize task
+# ✅ Initialize this ClearML task
 task = Task.init(project_name="VisiblePipeline", task_name="stage_hpo")
 
-# ✅ Completed baseline training task ID
-base_task_id = "a9b6d3291e6846c1800476aabb057b06"  # your working stage_train_hpo_3 task
+# ✅ This is your completed base training task
+base_task_id = "a9b6d3291e6846c1800476aabb057b06"
 
-# ✅ PROPERLY define UniformParameterRange objects — NOT strings
+# ✅ Define hyperparameter ranges correctly
 param_ranges = {
     "General/learning_rate": UniformParameterRange(
-        name="learning_rate", min_value=0.0001, max_value=0.01),
+        name="General/learning_rate", min_value=0.0001, max_value=0.01),
     "General/dropout": UniformParameterRange(
-        name="dropout", min_value=0.3, max_value=0.5),
+        name="General/dropout", min_value=0.3, max_value=0.5),
     "General/dense_units": UniformParameterRange(
-        name="dense_units", min_value=128, max_value=512),
+        name="General/dense_units", min_value=128, max_value=512),
 }
 
-# ✅ Construct optimizer with correct parameter format
+# ✅ Configure the optimizer
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=param_ranges,
@@ -33,7 +33,7 @@ optimizer = HyperParameterOptimizer(
     clone_base_task_name_suffix="HPO_Trial"
 )
 
-# ✅ Print best trial summary
+# ✅ Print the best trial summary
 def print_best_result(hpo):
     best_task = hpo.get_best_task()
     if not best_task:
@@ -53,7 +53,7 @@ def print_best_result(hpo):
         if any(h in k for h in ["learning_rate", "dropout", "dense_units"]):
             print(f"   - {k}: {v}")
 
-# ✅ Run the HPO search
+# ✅ Run HPO
 optimizer.set_report_period(1)
 optimizer.start()
 print_best_result(optimizer)
