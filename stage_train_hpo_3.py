@@ -1,3 +1,12 @@
+import subprocess
+import sys
+
+# Auto-install seaborn if missing
+try:
+    import seaborn as sns
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
+    import seaborn as sns
 from clearml import Task, Dataset
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
