@@ -11,7 +11,6 @@ params = task.get_parameters_as_dict()
 base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 print(f"📌 Using base_task_id = {base_task_id}")
 
-# ✅ Define HPO grid space
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=[
@@ -21,12 +20,13 @@ optimizer = HyperParameterOptimizer(
     objective_metric_title="accuracy",
     objective_metric_series="val_accuracy",
     objective_metric_sign="max",
-    max_number_of_concurrent_tasks=5,
+    max_number_of_concurrent_tasks=2,
     total_max_jobs=5,
     min_iteration_per_job=1,
-    always_create_task=True,
+    always_create_task=False,  # ✅ Force reusing exact env
     save_top_k_tasks_only=1
 )
+
 
 # ✅ Start and wait for trials
 print("🚀 Starting HPO grid search...")
