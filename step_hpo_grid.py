@@ -1,6 +1,5 @@
-from clearml import Task, TaskTypes
+from clearml import Task, TaskTypes, Task as TaskObj
 from clearml.automation import UniformParameterRange, HyperParameterOptimizer
-from clearml.backend_interface.task import Task as TaskObj
 import json
 import time
 
@@ -8,7 +7,7 @@ import time
 task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=TaskTypes.optimizer)
 print("🔗 Connected to ClearML for HPO Grid Search")
 
-# ✅ Use base task
+# ✅ Use confirmed working baseline ID
 params = task.get_parameters_as_dict()
 base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 print(f"📌 Using base_task_id = {base_task_id}")
@@ -30,32 +29,23 @@ optimizer = HyperParameterOptimizer(
     save_top_k_tasks_only=1
 )
 
-# ✅ Launch optimization
+# ✅ Launch HPO
 print("🚀 Launching HPO optimization...")
 best_task = optimizer.start()
-print("📌 HPO started. Collecting trial task IDs...")
 
-# ✅ Fetch task IDs for launched trials
-trial_ids = optimizer.get_top_tasks(5)
-trial_task_ids = [t.id for t in trial_ids]
-print(f"📋 Found trial tasks: {trial_task_ids}")
-
-# ✅ Wait for all trials to complete
-print("⏳ Waiting for all trial tasks to complete...")
+# ✅ Wait for trials by querying all children of this HPO task
+print("⏳ Waiting for all HPO trial tasks to complete...")
 while True:
-    still_running = 0
-    for tid in trial_task_ids:
-        t = TaskObj.get_task(task_id=tid)
-        if t.status not in ("completed", "failed", "closed"):
-            still_running += 1
-    print(f"🔄 Still running: {still_running} trial(s)")
-    if still_running == 0:
+    all_tasks = TaskObj.query_tasks(parent=task.id, project=task.get_project_name())
+    still_running = [t for t in all_tasks if t.status not in ("completed", "failed", "closed")]
+    print(f"🔄 {len(still_running)} trial(s) still running...")
+    if not still_running:
         break
     time.sleep(15)
 
 print("✅ All trials completed.")
 
-# ✅ Save & log best hyperparameters
+# ✅ Save and print best hyperparameters
 best_params = best_task.get_parameters()
 best_metrics = best_task.get_last_scalar_metrics()
 
@@ -76,4 +66,4 @@ else:
     print("⚠️ Warning: Best validation accuracy not found.")
 
 task.close()
-print("✅ HPO grid task complete and results saved.")
+print("✅ HPO grid task completed and results saved.")
