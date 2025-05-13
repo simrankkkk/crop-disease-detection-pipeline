@@ -9,10 +9,9 @@ from sklearn.utils.multiclass import unique_labels
 import os, numpy as np, pickle, matplotlib.pyplot as plt
 import json
 
-# ✅ Create ClearML task and define Args explicitly in 'Args' section
+# ✅ Create ClearML task and log Args under Hyperparameters → General
 task = Task.init(project_name="VisiblePipeline", task_name="step_train", task_type=Task.TaskTypes.training)
 
-# ✅ Connect Args under the correct section name
 default_args = {
     "learning_rate": 0.001,
     "dropout": 0.4,
@@ -21,7 +20,7 @@ default_args = {
     "val_split_ratio": 0.5,
     "image_size": 160
 }
-params = task.connect_configuration(name="Args", configuration=default_args)
+params = task.connect(default_args)  # ✅ Required for HPO to override!
 
 # Extract hyperparameters
 lr = float(params["learning_rate"])
@@ -78,7 +77,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
 
-# ✅ Training loop to log scalars
+# ✅ Training loop with scalar logging
 for epoch in range(epochs):
     print(f"🔁 Training Epoch {epoch+1}/{epochs}")
     history = model.fit(train_ds, validation_data=val_ds, epochs=1, verbose=1)
@@ -140,4 +139,4 @@ plt.savefig("outputs/train_curves.png")
 task.upload_artifact("training_curves", artifact_object="outputs/train_curves.png")
 
 task.close()
-print("✅ Baseline training complete — all scalars, args, and artifacts recorded.")
+print("✅ Baseline training complete — now fully HPO compatible.")
