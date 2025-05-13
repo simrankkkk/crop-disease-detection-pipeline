@@ -21,7 +21,7 @@ default_args = {
     "val_split_ratio": 0.5,
     "image_size": 160
 }
-params = task.connect(default_args)  # ensures values show under Args
+params = task.connect_configuration(name="Args", configuration=default_args)
 
 # Extract args
 lr = float(params["learning_rate"])
