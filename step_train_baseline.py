@@ -9,10 +9,10 @@ from sklearn.utils.multiclass import unique_labels
 import os, numpy as np, pickle, matplotlib.pyplot as plt
 import json
 
-# ✅ Create ClearML task and define Args explicitly
+# ✅ Create ClearML task and define Args explicitly in 'Args' section
 task = Task.init(project_name="VisiblePipeline", task_name="step_train", task_type=Task.TaskTypes.training)
 
-# ✅ Ensure Args section exists & contains these defaults for visibility
+# ✅ Connect Args under the correct section name
 default_args = {
     "learning_rate": 0.001,
     "dropout": 0.4,
@@ -23,7 +23,7 @@ default_args = {
 }
 params = task.connect_configuration(name="Args", configuration=default_args)
 
-# Extract args
+# Extract hyperparameters
 lr = float(params["learning_rate"])
 dropout = float(params["dropout"])
 epochs = int(params["epochs"])
@@ -34,12 +34,12 @@ img_size = int(params["image_size"])
 logger = task.get_logger()
 print(f"📌 Using Args: lr={lr}, dropout={dropout}, epochs={epochs}, img={img_size}, train%={train_ratio}, val%={val_ratio}")
 
-# ✅ Load dataset from ClearML
+# ✅ Load dataset
 dataset = Dataset.get(dataset_name="plant_processed_data_split", dataset_project="VisiblePipeline", only_completed=True)
 dataset_path = dataset.get_local_copy()
 train_dir, val_dir, test_dir = [os.path.join(dataset_path, x) for x in ["train", "valid", "test"]]
 
-# ✅ Load subset function
+# ✅ Load subset
 def load_subset(ds_path, ratio):
     ds_full = tf.keras.preprocessing.image_dataset_from_directory(
         ds_path, image_size=(img_size, img_size), batch_size=32, shuffle=True
@@ -74,11 +74,11 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# ✅ Output dir & callbacks
+# ✅ Callbacks and outputs
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
 
-# ✅ Manual training loop with full scalar logging
+# ✅ Training loop to log scalars
 for epoch in range(epochs):
     print(f"🔁 Training Epoch {epoch+1}/{epochs}")
     history = model.fit(train_ds, validation_data=val_ds, epochs=1, verbose=1)
@@ -93,7 +93,7 @@ for epoch in range(epochs):
     logger.report_scalar("loss", "train_loss", iteration=epoch, value=train_loss)
     logger.report_scalar("loss", "val_loss", iteration=epoch, value=val_loss)
 
-# ✅ Save model and artifacts
+# ✅ Save outputs
 model.save("outputs/final_model.h5")
 with open("outputs/train_history.pkl", "wb") as f:
     pickle.dump(history.history, f)
@@ -140,4 +140,4 @@ plt.savefig("outputs/train_curves.png")
 task.upload_artifact("training_curves", artifact_object="outputs/train_curves.png")
 
 task.close()
-print("✅ Baseline training complete — everything recorded, ready for HPO!")
+print("✅ Baseline training complete — all scalars, args, and artifacts recorded.")
