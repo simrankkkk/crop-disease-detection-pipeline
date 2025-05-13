@@ -2,22 +2,22 @@ from clearml import Task, TaskTypes
 from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 import json
 
-# ✅ Initialize ClearML HPO Task
+# ✅ Start HPO Task
 task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=Task.TaskTypes.optimizer)
 print("🔗 Connected to ClearML for HPO Grid Search")
 
-# ✅ Use dynamic or fallback task ID
+# ✅ Use manually confirmed task ID for baseline training
 params = task.get_parameters_as_dict()
-base_task_id = params.get("Args/base_task_id") or "134bd547929944de8ee9ee4756152e03"  # ✅ corrected!
+base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 
 print(f"📌 Using base_task_id = {base_task_id}")
 
-# ✅ Define HPO search space
+# ✅ Define HPO search space using 'General/' section
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=[
-        UniformParameterRange("Args/learning_rate", 0.0005, 0.01, 0.002),
-        UniformParameterRange("Args/dropout", 0.3, 0.6, 0.1)
+        UniformParameterRange("General/learning_rate", 0.0005, 0.01, 0.002),
+        UniformParameterRange("General/dropout", 0.3, 0.6, 0.1)
     ],
     objective_metric_title="accuracy",
     objective_metric_series="val_accuracy",
@@ -29,9 +29,7 @@ optimizer = HyperParameterOptimizer(
     save_top_k_tasks_only=1
 )
 
-# ✅ Start the grid search
+# ✅ Start the HPO job
 optimizer.start()
-
-# ✅ Close the task
 task.close()
 print("✅ HPO grid search completed and task closed.")
