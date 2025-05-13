@@ -1,4 +1,4 @@
-from clearml import Task, TaskTypes, Task as TaskObj
+from clearml import Task, TaskTypes
 from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 import json
 import time
@@ -7,12 +7,11 @@ import time
 task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=TaskTypes.optimizer)
 print("🔗 Connected to ClearML for HPO Grid Search")
 
-# ✅ Use confirmed working baseline ID
 params = task.get_parameters_as_dict()
 base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 print(f"📌 Using base_task_id = {base_task_id}")
 
-# ✅ Configure HPO
+# ✅ Set up optimizer
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=[
@@ -33,10 +32,13 @@ optimizer = HyperParameterOptimizer(
 print("🚀 Launching HPO optimization...")
 best_task = optimizer.start()
 
-# ✅ Wait for trials by querying all children of this HPO task
+# ✅ Wait for all child tasks of this HPO run to finish
 print("⏳ Waiting for all HPO trial tasks to complete...")
 while True:
-    all_tasks = TaskObj.query_tasks(parent=task.id, project=task.get_project_name())
+    all_tasks = Task.get_tasks(task_filter={
+        "parent": [task.id],
+        "project": [task.get_project_name()],
+    })
     still_running = [t for t in all_tasks if t.status not in ("completed", "failed", "closed")]
     print(f"🔄 {len(still_running)} trial(s) still running...")
     if not still_running:
@@ -45,7 +47,7 @@ while True:
 
 print("✅ All trials completed.")
 
-# ✅ Save and print best hyperparameters
+# ✅ Save and upload best parameters
 best_params = best_task.get_parameters()
 best_metrics = best_task.get_last_scalar_metrics()
 
