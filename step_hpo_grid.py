@@ -3,16 +3,16 @@ from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 import json
 
 # ✅ Start HPO Task
-task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=Task.TaskTypes.optimizer)
+task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=TaskTypes.optimizer)
 print("🔗 Connected to ClearML for HPO Grid Search")
 
-# ✅ Use manually confirmed task ID for baseline training
+# ✅ Use confirmed working baseline task
 params = task.get_parameters_as_dict()
 base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 
 print(f"📌 Using base_task_id = {base_task_id}")
 
-# ✅ Define HPO search space using 'General/' section
+# ✅ Define hyperparameter space (General section)
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=[
@@ -29,7 +29,7 @@ optimizer = HyperParameterOptimizer(
     save_top_k_tasks_only=1
 )
 
-# ✅ Start the HPO job
+# ✅ Start the grid search
 optimizer.start()
 task.close()
 print("✅ HPO grid search completed and task closed.")
