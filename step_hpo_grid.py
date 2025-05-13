@@ -1,15 +1,15 @@
-from clearml import Task, TaskTypes, TaskTemplate
-from clearml.automation import UniformParameterRange
+from clearml import Task, TaskTypes
+from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 import json
 
 # ✅ Start ClearML HPO Task
 task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=TaskTypes.optimizer)
+print("🔗 Connected to ClearML for HPO Grid Search")
 
-# ✅ Define HPO parameters manually
-template_task_id = "681dd8e8c082451fb4a1c9d44e5e83e2"  # baseline step_train task
+# ✅ Use your working step_train task as base
+template_task_id = "681dd8e8c082451fb4a1c9d44e5e83e2"  # ← step_train (baseline)
 
-from clearml.automation import HyperParameterOptimizer
-
+# ✅ Setup ClearML's native HPO (non-Optuna)
 optimizer = HyperParameterOptimizer(
     base_task_id=template_task_id,
     hyper_parameters={
@@ -26,8 +26,9 @@ optimizer = HyperParameterOptimizer(
     save_top_k_tasks_only=1
 )
 
-# ✅ Run the grid/random search
+# ✅ Run HPO
 best_task = optimizer.run()
+print("🏁 HPO complete")
 
 # ✅ Extract best parameters
 best_params = best_task.get_parameters_as_dict()
@@ -36,10 +37,10 @@ filtered_params = {
     "dropout": float(best_params.get("Args/dropout", 0.4))
 }
 
-# ✅ Save best parameters
+# ✅ Save and upload best parameters
 with open("best_params.json", "w") as f:
     json.dump(filtered_params, f)
 
 task.upload_artifact(name="best_params", artifact_object="best_params.json")
 task.close()
-print("✅ Grid HPO completed with best params saved.")
+print("✅ Best parameters saved successfully.")
