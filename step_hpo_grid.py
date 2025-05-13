@@ -9,12 +9,14 @@ print("🔗 Connected to ClearML for HPO Grid Search")
 # ✅ Use your working step_train task as base
 template_task_id = "681dd8e8c082451fb4a1c9d44e5e83e2"  # ← step_train (baseline)
 
+from clearml.automation import UniformParameterRange
+
 optimizer = HyperParameterOptimizer(
     base_task_id=template_task_id,
-    hyper_parameters={
-        "Args/learning_rate": UniformParameterRange(0.0005, 0.01, 0.002),
-        "Args/dropout": UniformParameterRange(0.3, 0.6, 0.1)
-    },
+    hyper_parameters=[
+        UniformParameterRange('Args/learning_rate', 0.0005, 0.01, 0.002),
+        UniformParameterRange('Args/dropout', 0.3, 0.6, 0.1)
+    ],
     objective_metric_title="accuracy",
     objective_metric_series="val_accuracy",
     objective_metric_sign="max",
@@ -24,6 +26,7 @@ optimizer = HyperParameterOptimizer(
     always_create_task=True,
     save_top_k_tasks_only=1
 )
+
 
 
 # ✅ Run HPO
