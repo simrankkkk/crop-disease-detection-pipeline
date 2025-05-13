@@ -3,7 +3,7 @@ from clearml.automation import UniformParameterRange, HyperParameterOptimizer
 import json
 import time
 
-# ✅ Start HPO Task
+# ✅ Initialize HPO Task
 task = Task.init(project_name="VisiblePipeline", task_name="step_hpo_grid", task_type=TaskTypes.optimizer)
 print("🔗 Connected to ClearML for HPO Grid Search")
 
@@ -11,7 +11,7 @@ params = task.get_parameters_as_dict()
 base_task_id = params.get("Args/base_task_id") or "950c9256da504bf1ac395253816321a6"
 print(f"📌 Using base_task_id = {base_task_id}")
 
-# ✅ Set up optimizer
+# ✅ Configure HPO
 optimizer = HyperParameterOptimizer(
     base_task_id=base_task_id,
     hyper_parameters=[
@@ -28,44 +28,48 @@ optimizer = HyperParameterOptimizer(
     save_top_k_tasks_only=1
 )
 
-# ✅ Launch HPO
+# ✅ Start HPO
 print("🚀 Launching HPO optimization...")
 best_task = optimizer.start()
 
-# ✅ Wait for all child tasks of this HPO run to finish
-print("⏳ Waiting for all HPO trial tasks to complete...")
+# ✅ Get all trial task IDs from optimizer
+print("⏳ Waiting for all trial tasks to complete...")
+trial_task_ids = [child.id for child in optimizer._top_tasks.values() if child]
+print(f"🔍 Monitoring {len(trial_task_ids)} trial tasks...")
+
+# ✅ Wait for trials to complete
+from clearml.backend_interface.task.task import Task as TaskObj
 while True:
-    all_tasks = Task.get_tasks(task_filter={
-        "parent": [task.id],
-        "project": [task.get_project_name()],
-    })
-    still_running = [t for t in all_tasks if t.status not in ("completed", "failed", "closed")]
-    print(f"🔄 {len(still_running)} trial(s) still running...")
-    if not still_running:
+    pending = 0
+    for tid in trial_task_ids:
+        t = TaskObj.get_task(tid)
+        if t.status not in ("completed", "failed", "closed"):
+            pending += 1
+    print(f"⏳ {pending} trial(s) still running...")
+    if pending == 0:
         break
     time.sleep(15)
 
-print("✅ All trials completed.")
+print("✅ All HPO trials completed.")
 
-# ✅ Save and upload best parameters
+# ✅ Save and upload best params
 best_params = best_task.get_parameters()
-best_metrics = best_task.get_last_scalar_metrics()
-
 with open("best_params.json", "w") as f:
     json.dump(best_params, f, indent=4)
-
 task.upload_artifact("best_params", artifact_object="best_params.json")
 
+# ✅ Print best results
 print("\n🏆 Best Hyperparameters:")
 for k, v in best_params.items():
     if "learning_rate" in k or "dropout" in k:
         print(f"🔧 {k} = {v}")
 
+best_metrics = best_task.get_last_scalar_metrics()
 val_acc = best_metrics.get("accuracy", {}).get("val_accuracy", {}).get("value", None)
 if val_acc is not None:
     print(f"📈 Best Validation Accuracy: {val_acc:.4f}")
 else:
-    print("⚠️ Warning: Best validation accuracy not found.")
+    print("⚠️ Best validation accuracy not found in scalar logs.")
 
 task.close()
-print("✅ HPO grid task completed and results saved.")
+print("✅ HPO grid task completed, best_params.json uploaded.")
