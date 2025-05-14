@@ -60,9 +60,9 @@ pipe.add_step(
     execution_queue="default",
     parameter_override={
         "Args/dataset_id": "${step_preprocess.id}",
-        "Args/best_result_json": "${step_hpo_manual_grid.artifacts.best_result_json.url}"
+        "Args/hpo_task_id": "${step_hpo_manual_grid.id}"
     }
 )
 
-# 🚀 Start the pipeline
+# 🚀 Launch the pipeline
 pipe.start(queue="pipeline")
