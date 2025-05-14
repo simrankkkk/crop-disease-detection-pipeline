@@ -1,6 +1,6 @@
 from clearml.automation.controller import PipelineController
 
-# ✅ Initialize the pipeline
+# Initialize the pipeline
 pipe = PipelineController(
     name="T3chOpsClearMLProject",
     project="T3chOpsClearMLProject",
@@ -27,7 +27,7 @@ pipe.add_step(
     }
 )
 
-# STEP 3: Train baseline hybrid model
+# STEP 3: Train baseline model
 pipe.add_step(
     name="step_train_baseline",
     parents=["step_preprocess"],
@@ -39,7 +39,7 @@ pipe.add_step(
     }
 )
 
-# STEP 4: Manual grid HPO
+# STEP 4: HPO trials (manual grid)
 pipe.add_step(
     name="step_hpo_manual_grid",
     parents=["step_preprocess"],
@@ -47,11 +47,12 @@ pipe.add_step(
     base_task_name="step_hpo_manual_grid",
     execution_queue="default",
     parameter_override={
-        "Args/dataset_id": "${step_preprocess.id}"
+        "Args/dataset_id": "${step_preprocess.id}",
+        "Args/baseline_task_id": "${step_train_baseline.id}"
     }
 )
 
-# STEP 5: Final training using best HPO params
+# STEP 5: Final training using best result
 pipe.add_step(
     name="step_train_final",
     parents=["step_hpo_manual_grid"],
@@ -60,10 +61,9 @@ pipe.add_step(
     execution_queue="default",
     parameter_override={
         "Args/dataset_id": "${step_preprocess.id}",
-        "Args/hpo_task_id": "${step_hpo_manual_grid.id}",
-        "Args/best_result": "${step_hpo_manual_grid.artifacts.best_result.url}"
+        "Args/hpo_task_id": "${step_hpo_manual_grid.id}"
     }
 )
 
-# ✅ Run the pipeline
+# Run the pipeline
 pipe.start(queue="pipeline")
