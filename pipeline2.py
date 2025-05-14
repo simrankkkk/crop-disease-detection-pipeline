@@ -1,6 +1,20 @@
-from clearml import Task
-from clearml.automation import PipelineDecorator
+# pipeline2.py
 
+from clearml import Task
+from clearml.automation.controller import PipelineDecorator
+
+# ----------------------------------------------------------------------------
+# 1) Force-register your project so it’s resolvable inside the decorator
+# ----------------------------------------------------------------------------
+Task.init(
+    project_name="T3chOpsClearMLProject",
+    task_name="__pipeline_entrypoint__",
+    task_type=Task.TaskTypes.testing
+).close()
+
+# ----------------------------------------------------------------------------
+# 2) Define your pipeline with the decorator
+# ----------------------------------------------------------------------------
 @PipelineDecorator.pipeline(
     name="T3chOpsClearMLProject",
     project="T3chOpsClearMLProject",
@@ -8,58 +22,61 @@ from clearml.automation import PipelineDecorator
 )
 def run_pipeline():
     # STEP 1: Upload
-    step_upload = Task.add_task(
+    t1 = Task.add_task(
         project_name="T3chOpsClearMLProject",
         task_name="step_upload",
         task_type=Task.TaskTypes.data_processing,
-        execution_queue="default"
+        execution_queue="default",
     )
-    dataset_id = step_upload.id
+    ds_id = t1.id
 
     # STEP 2: Preprocess
-    step_preprocess = Task.add_task(
+    t2 = Task.add_task(
         project_name="T3chOpsClearMLProject",
         task_name="step_preprocess",
         task_type=Task.TaskTypes.data_processing,
         execution_queue="default",
-        parameter_override={"Args/dataset_id": dataset_id}
+        parameter_override={"Args/dataset_id": ds_id},
     )
-    split_dataset_id = step_preprocess.id
+    split_id = t2.id
 
-    # STEP 3: Train Baseline
-    step_baseline = Task.add_task(
+    # STEP 3: Baseline train
+    t3 = Task.add_task(
         project_name="T3chOpsClearMLProject",
         task_name="step_train_baseline",
         task_type=Task.TaskTypes.training,
         execution_queue="default",
-        parameter_override={"Args/dataset_id": split_dataset_id}
+        parameter_override={"Args/dataset_id": split_id},
     )
-    baseline_task_id = step_baseline.id
+    base_id = t3.id
 
     # STEP 4: HPO
-    step_hpo = Task.add_task(
+    t4 = Task.add_task(
         project_name="T3chOpsClearMLProject",
         task_name="step_hpo_manual_grid",
         task_type=Task.TaskTypes.controller,
         execution_queue="default",
         parameter_override={
-            "Args/dataset_id": split_dataset_id,
-            "Args/baseline_task_id": baseline_task_id
-        }
+            "Args/dataset_id": split_id,
+            "Args/baseline_task_id": base_id,
+        },
     )
-    hpo_task_id = step_hpo.id
+    hpo_id = t4.id
 
-    # STEP 5: Final Train
+    # STEP 5: Final train
     Task.add_task(
         project_name="T3chOpsClearMLProject",
         task_name="step_train_final",
         task_type=Task.TaskTypes.training,
         execution_queue="default",
         parameter_override={
-            "Args/dataset_id": split_dataset_id,
-            "Args/hpo_task_id": hpo_task_id
-        }
+            "Args/dataset_id": split_id,
+            "Args/hpo_task_id": hpo_id,
+        },
     )
 
-if __name__ == '__main__':
+# ----------------------------------------------------------------------------
+# 3) Run the pipeline by calling the decorated function
+# ----------------------------------------------------------------------------
+if __name__ == "__main__":
     run_pipeline()
