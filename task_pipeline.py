@@ -1,7 +1,7 @@
 from clearml import PipelineController
 
 pipe = PipelineController(
-    name="task_pipeline",
+    name="VisiblePipelineRun",
     project="VisiblePipeline",
     version="2.0",
     add_pipeline_tags=False
