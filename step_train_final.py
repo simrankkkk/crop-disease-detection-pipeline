@@ -13,9 +13,16 @@ import json, seaborn as sns
 task = Task.init(project_name="VisiblePipeline", task_name="step_train_final", task_type=Task.TaskTypes.training)
 
 # ✅ Get HPO task and load best_result.json
-hpo_task_id = Task.current_task().get_parameters_as_dict().get("Args/hpo_task_id") or "6995c0140b534b2e854ddf93590f2d3e"
+params = task.get_parameters()
+hpo_task_id = params.get("Args/hpo_task_id", "6995c0140b534b2e854ddf93590f2d3e")
+
+print(f"📦 Using HPO Task ID: {hpo_task_id}")
 hpo_task = Task.get_task(task_id=hpo_task_id)
-artifact = hpo_task.artifacts["best_result"]
+
+artifact = hpo_task.artifacts.get("best_result")
+if artifact is None:
+    raise ValueError("❌ Could not find 'best_result' artifact in HPO task.")
+
 best_result = json.load(open(artifact.get_local_copy(), "r"))
 
 # ✅ Extract best parameters
