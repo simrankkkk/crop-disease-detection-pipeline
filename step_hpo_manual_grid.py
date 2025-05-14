@@ -3,7 +3,7 @@ import json
 import time
 
 # ✅ Start controller task
-controller = Task.init(project_name="VisiblePipeline", task_name="step_hpo_manual_grid", task_type=Task.TaskTypes.controller)
+controller = Task.init(project_name="T3chOpsClearMLProject", task_name="step_hpo_manual_grid", task_type=Task.TaskTypes.controller)
 
 # ✅ Define manual hyperparameter combinations
 param_sets = [
