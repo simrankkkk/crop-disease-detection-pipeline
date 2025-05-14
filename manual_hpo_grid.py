@@ -5,7 +5,7 @@ import json
 import time
 
 # ✅ Init controller task
-controller = Task.init(project_name="VisiblePipeline", task_name="manual_hpo_grid", task_type=Task.TaskTypes.optimizer)
+controller = Task.init(project_name="T3chOpsClearMLProject", task_name="manual_hpo_grid", task_type=Task.TaskTypes.optimizer)
 params = controller.get_parameters_as_dict()
 
 # ✅ Use dynamic baseline from pipeline override
@@ -31,11 +31,11 @@ import json
 import time
 
 # ✅ Connect ClearML controller task
-controller = Task.init(project_name="VisiblePipeline", task_name="manual_hpo_grid", task_type=Task.TaskTypes.optimizer)
+controller = Task.init(project_name="T3chOpsClearMLProject", task_name="manual_hpo_grid", task_type=Task.TaskTypes.optimizer)
 queue_name = "default"
 
 # ✅ Use your successful training task as the base
-base_task_id = "950c9256da504bf1ac395253816321a6"
+base_task_id = "812a4d293cda4f619e18b91217c10f57"
 base_task = Task.get_task(task_id=base_task_id)
 
 # ✅ Define hyperparameter grid
