@@ -24,7 +24,8 @@ for i, params in enumerate(param_sets):
     print(f"🔁 Creating trial {i+1} with params: {params}")
 
     # Clone baseline
-    trial = Task.clone(source_task_id=baseline_task_id, name=f"hpo_trial_{i+1}", parent=controller.id)
+    trial = Task.clone(task_id=baseline_task_id, name=f"hpo_trial_{i+1}", parent=controller.id)
+
 
     # Override hyperparameters
     trial.set_parameter("General/learning_rate", params["learning_rate"])
