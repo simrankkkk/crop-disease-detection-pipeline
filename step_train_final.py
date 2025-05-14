@@ -16,7 +16,7 @@ task = Task.init(project_name="VisiblePipeline", task_name="step_train_final", t
 hpo_task_id = Task.current_task().get_parameters_as_dict().get("Args/hpo_task_id") or "6995c0140b534b2e854ddf93590f2d3e"
 hpo_task = Task.get_task(task_id=hpo_task_id)
 artifact = hpo_task.artifacts["best_result"]
-best_result = json.loads(artifact.get())
+best_result = json.load(open(artifact.get_local_copy(), "r"))
 
 # ✅ Extract best parameters
 best_params = best_result["best_params"]
