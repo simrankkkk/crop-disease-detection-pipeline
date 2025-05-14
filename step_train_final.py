@@ -10,7 +10,7 @@ import os, numpy as np, pickle, matplotlib.pyplot as plt
 import json, seaborn as sns
 
 # ✅ Start ClearML task
-task = Task.init(project_name="VisiblePipeline", task_name="step_train_final", task_type=Task.TaskTypes.training)
+task = Task.init(project_name="T3chOpsClearMLProject, task_name="step_train_final", task_type=Task.TaskTypes.training)
 
 # ✅ Get HPO task and load best_result.json
 params = task.get_parameters()
@@ -38,7 +38,13 @@ logger = task.get_logger()
 print(f"🔧 Training final model with: lr={lr}, dropout={dropout}, epochs={epochs}, train_ratio={train_ratio}")
 
 # ✅ Load dataset
-dataset = Dataset.get(dataset_name="plant_processed_data_split", dataset_project="VisiblePipeline", only_completed=True)
+dataset_id = params.get("Args/dataset_id")
+if dataset_id:
+    print(f"📂 Loading dataset from pipeline: {dataset_id}")
+    dataset = Dataset.get(dataset_id=dataset_id)
+else:
+    print("📂 No dataset_id passed — using fallback dataset manually.")
+    dataset = Dataset.get(dataset_name="T3chOps_processed_data_split", dataset_project="T3chOpsClearMLProject", only_completed=True)
 dataset_path = dataset.get_local_copy()
 train_dir, val_dir, test_dir = [os.path.join(dataset_path, x) for x in ["train", "valid", "test"]]
 
