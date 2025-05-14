@@ -6,8 +6,16 @@ pipe = PipelineController(
     version="2.0",
     add_pipeline_tags=False
 )
+# Step 1: Upload
+pipe.add_step(
+    name="step_upload",
+    base_task_project="VisiblePipeline",
+    base_task_name="step_upload",
+    execution_queue="default"
+)
 
-# Step 1: Preprocess
+
+# Step 2: Preprocess
 pipe.add_step(
     name="step_preprocess",
     base_task_project="VisiblePipeline",
@@ -15,7 +23,7 @@ pipe.add_step(
     execution_queue="default"
 )
 
-# Step 2: Baseline training
+# Step 3: Baseline training
 pipe.add_step(
     name="step_train_baseline",
     base_task_project="VisiblePipeline",
@@ -24,7 +32,7 @@ pipe.add_step(
     execution_queue="default"
 )
 
-# Step 3: Manual HPO
+# Step 4: Manual HPO
 pipe.add_step(
     name="step_hpo_manual_grid",
     base_task_project="VisiblePipeline",
@@ -36,7 +44,7 @@ pipe.add_step(
     }
 )
 
-# Step 4: Final training with best params
+# Step 5: Final training with best params
 pipe.add_step(
     name="step_train_final",
     base_task_project="VisiblePipeline",
