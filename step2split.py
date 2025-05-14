@@ -67,7 +67,7 @@ for split in ["train", "valid", "test"]:
 print("\n🚀 Uploading split dataset to ClearML...")
 new_dataset = Dataset.create(
     dataset_name="plant_processed_data_split",
-    dataset_project="VisiblePipeline",
+    dataset_project="T3chOpsClearMLProject",
     parent_datasets=[dataset.id]
 )
 new_dataset.add_files(path=output_base)
