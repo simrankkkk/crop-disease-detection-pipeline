@@ -11,7 +11,7 @@ pipe = PipelineController(
 pipe.add_step(
     name="step_preprocess",
     base_task_project="VisiblePipeline",
-    base_task_name="step2split",
+    base_task_name="step_preprocess",
     execution_queue="default"
 )
 
