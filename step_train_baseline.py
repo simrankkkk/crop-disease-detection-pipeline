@@ -11,7 +11,7 @@ import json
 import seaborn as sns
 
 # ✅ Create ClearML task
-task = Task.init(project_name="VisiblePipeline", task_name="step_train_baseline", task_type=Task.TaskTypes.training)
+task = Task.init(project_name="T3chOpsClearMLProject", task_name="step_train_baseline", task_type=Task.TaskTypes.training)
 
 # ✅ Force scalars to show up even if missing
 val_acc_dummy = 0.0
