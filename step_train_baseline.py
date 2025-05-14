@@ -8,9 +8,13 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 import os, numpy as np, pickle, matplotlib.pyplot as plt
 import json
+import seaborn as sns
 
-# ✅ Create ClearML task and log Args under Hyperparameters → General
-task = Task.init(project_name="VisiblePipeline", task_name="step_train", task_type=Task.TaskTypes.training)
+# ✅ Create ClearML task
+task = Task.init(project_name="VisiblePipeline", task_name="step_train_baseline", task_type=Task.TaskTypes.training)
+
+# ✅ Force scalars to show up even if missing
+val_acc_dummy = 0.0
 
 default_args = {
     "learning_rate": 0.001,
@@ -20,7 +24,7 @@ default_args = {
     "val_split_ratio": 0.5,
     "image_size": 160
 }
-params = task.connect(default_args)  # ✅ Required for HPO to override!
+params = task.connect(default_args)
 
 # Extract hyperparameters
 lr = float(params["learning_rate"])
@@ -73,26 +77,25 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# ✅ Callbacks and outputs
+# ✅ Train model
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
 
-# ✅ Training loop with scalar logging
-for epoch in range(epochs):
-    print(f"🔁 Training Epoch {epoch+1}/{epochs}")
-    history = model.fit(train_ds, validation_data=val_ds, epochs=1, verbose=1)
+history = model.fit(train_ds, validation_data=val_ds, epochs=epochs, callbacks=[checkpoint_cb], verbose=1)
 
-    train_acc = history.history['accuracy'][0]
-    train_loss = history.history['loss'][0]
-    val_acc = history.history['val_accuracy'][0]
-    val_loss = history.history['val_loss'][0]
+# ✅ Log scalars manually for each epoch, even if missing
+for i in range(epochs):
+    train_acc = history.history.get("accuracy", [val_acc_dummy])[i]
+    val_acc = history.history.get("val_accuracy", [val_acc_dummy])[i]
+    train_loss = history.history.get("loss", [0.0])[i]
+    val_loss = history.history.get("val_loss", [0.0])[i]
 
-    logger.report_scalar("accuracy", "train_accuracy", iteration=epoch, value=train_acc)
-    logger.report_scalar("accuracy", "val_accuracy", iteration=epoch, value=val_acc)
-    logger.report_scalar("loss", "train_loss", iteration=epoch, value=train_loss)
-    logger.report_scalar("loss", "val_loss", iteration=epoch, value=val_loss)
+    logger.report_scalar("accuracy", "train_accuracy", iteration=i, value=train_acc)
+    logger.report_scalar("accuracy", "val_accuracy", iteration=i, value=val_acc)
+    logger.report_scalar("loss", "train_loss", iteration=i, value=train_loss)
+    logger.report_scalar("loss", "val_loss", iteration=i, value=val_loss)
 
-# ✅ Save outputs
+# ✅ Save model and training history
 model.save("outputs/final_model.h5")
 with open("outputs/train_history.pkl", "wb") as f:
     pickle.dump(history.history, f)
@@ -115,7 +118,6 @@ logger.report_text("📊 Classification Report:\n" + report)
 # ✅ Confusion matrix
 cm = confusion_matrix(y_true, y_pred, labels=list(range(len(class_names))))
 plt.figure(figsize=(10, 8))
-import seaborn as sns
 sns.heatmap(cm, annot=True, fmt="d", xticklabels=class_names, yticklabels=class_names, cmap="Blues")
 plt.title("Confusion Matrix")
 plt.xlabel("Predicted")
@@ -126,13 +128,13 @@ task.upload_artifact("confusion_matrix", artifact_object="outputs/confusion_matr
 # ✅ Training curves
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
-plt.plot(history.history['accuracy'], label="Train Acc")
-plt.plot(history.history['val_accuracy'], label="Val Acc")
+plt.plot(history.history.get('accuracy', []), label="Train Acc")
+plt.plot(history.history.get('val_accuracy', []), label="Val Acc")
 plt.title("Accuracy")
 plt.legend()
 plt.subplot(1, 2, 2)
-plt.plot(history.history['loss'], label="Train Loss")
-plt.plot(history.history['val_loss'], label="Val Loss")
+plt.plot(history.history.get('loss', []), label="Train Loss")
+plt.plot(history.history.get('val_loss', []), label="Val Loss")
 plt.title("Loss")
 plt.legend()
 plt.savefig("outputs/train_curves.png")
