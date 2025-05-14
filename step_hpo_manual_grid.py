@@ -12,7 +12,7 @@ param_sets = [
 ]
 
 # ✅ ID of working baseline task to clone
-baseline_task_id = "950c9256da504bf1ac395253816321a6"
+baseline_task_id = "2d2455b6ba724f5c91cfd7f83607bcbd"
 
 # ✅ Queue name
 queue = "default"
