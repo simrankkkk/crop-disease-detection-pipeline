@@ -38,7 +38,19 @@ logger = task.get_logger()
 print(f"📌 Using Args: lr={lr}, dropout={dropout}, epochs={epochs}, img={img_size}, train%={train_ratio}, val%={val_ratio}")
 
 # ✅ Load dataset
-dataset = Dataset.get(dataset_name="T3chOps_processed_data_split", dataset_project="T3chOpsClearMLProject", only_completed=True)
+params = task.connect(default_args)
+dataset_id = task.get_parameters().get("Args/dataset_id")
+
+if dataset_id:
+    print(f"📦 Loading dataset from pipeline: {dataset_id}")
+    dataset = Dataset.get(dataset_id=dataset_id)
+else:
+    print("📦 No pipeline dataset_id passed. Using default dataset name as fallback.")
+    dataset = Dataset.get(
+        dataset_name="T3chOps_processed_data_split",
+        dataset_project="T3chOpsClearMLProject",
+        only_completed=True
+    )
 dataset_path = dataset.get_local_copy()
 train_dir, val_dir, test_dir = [os.path.join(dataset_path, x) for x in ["train", "valid", "test"]]
 
