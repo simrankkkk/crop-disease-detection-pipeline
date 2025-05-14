@@ -38,7 +38,7 @@ logger = task.get_logger()
 print(f"📌 Using Args: lr={lr}, dropout={dropout}, epochs={epochs}, img={img_size}, train%={train_ratio}, val%={val_ratio}")
 
 # ✅ Load dataset
-dataset = Dataset.get(dataset_name="plant_processed_data_split", dataset_project="VisiblePipeline", only_completed=True)
+dataset = Dataset.get(dataset_name="T3chOps_processed_data_split", dataset_project="T3chOpsClearMLProject", only_completed=True)
 dataset_path = dataset.get_local_copy()
 train_dir, val_dir, test_dir = [os.path.join(dataset_path, x) for x in ["train", "valid", "test"]]
 
