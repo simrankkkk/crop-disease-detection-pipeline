@@ -11,7 +11,14 @@ param_sets = [
     {"learning_rate": 0.004, "dropout": 0.5},
 ]
 
-baseline_task_id = "2d2455b6ba724f5c91cfd7f83607bcbd"
+params = controller.get_parameters()
+baseline_task_id = params.get("Args/baseline_task_id", "2d2455b6ba724f5c91cfd7f83607bcbd")
+
+if baseline_task_id:
+    print(f"📌 Using baseline task ID: {baseline_task_id}")
+    baseline_task = Task.get_task(task_id=baseline_task_id)
+else:
+    raise ValueError("❌ baseline_task_id not provided and no fallback found.")
 queue = "default"
 submitted_tasks = []
 
