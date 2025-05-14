@@ -2,7 +2,7 @@ from clearml import Dataset, Task
 
 # ✅ Init task under new project
 Task.init(
-    project_name="VisiblePipeline",
+    project_name="T3chOpsClearMLProject",
     task_name="step_upload",
     task_type=Task.TaskTypes.data_processing
 )
