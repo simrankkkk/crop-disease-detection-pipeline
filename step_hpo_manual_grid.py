@@ -43,10 +43,15 @@ all_results = []
 for tid in submitted_tasks:
     t = Task.get_task(task_id=tid)
     scalars = t.get_reported_scalars()
-    params = t.get_parameters().get("General", {})
     val_acc = -1
 
     try:
+        # ✅ Extract actual hyperparameters directly
+        params = {
+            "learning_rate": t.get_parameter("General/learning_rate"),
+            "dropout": t.get_parameter("General/dropout")
+        }
+
         val_accuracy_data = scalars.get("accuracy", {}).get("val_accuracy", {})
         if "y" in val_accuracy_data and isinstance(val_accuracy_data["y"], list) and val_accuracy_data["y"]:
             val_acc = max([float(v) for v in val_accuracy_data["y"] if isinstance(v, (float, int))])
