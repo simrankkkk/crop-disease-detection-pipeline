@@ -5,7 +5,7 @@ import random
 from collections import defaultdict
 
 # Connect to ClearML Task
-task = Task.init(project_name="VisiblePipeline", task_name="step_preprocess")
+task = Task.init(project_name="T3chOpsClearMLProject", task_name="step_preprocess")
 print("🔗 Connected to ClearML Task")
 
 # Load the original dataset from ClearML
