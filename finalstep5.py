@@ -43,7 +43,7 @@ task.set_parameter("General/dropout", dropout)
 print(f"📌 Final training using best hyperparameters: lr={lr}, dropout={dropout}")
 task.get_logger().report_text(f"📌 Best Params: lr={lr}, dropout={dropout}")
 
-epochs = 5
+epochs = 3
 img_size = 160
 train_ratio = 0.1
 val_ratio = 0.5
@@ -105,10 +105,11 @@ history = model.fit(train_ds, validation_data=val_ds, epochs=epochs, callbacks=[
 # ✅ Log scalars manually
 logger = task.get_logger()
 for i in range(epochs):
-    logger.report_scalar("accuracy", "train_accuracy", i, history.history["accuracy"][i])
-    logger.report_scalar("accuracy", "val_accuracy", i, history.history["val_accuracy"][i])
-    logger.report_scalar("loss", "train_loss", i, history.history["loss"][i])
-    logger.report_scalar("loss", "val_loss", i, history.history["val_loss"][i])
+    logger.report_scalar("accuracy", "train_accuracy", int(i), float(history.history["accuracy"][i]))
+    logger.report_scalar("accuracy", "val_accuracy", int(i), float(history.history["val_accuracy"][i]))
+    logger.report_scalar("loss", "train_loss", int(i), float(history.history["loss"][i]))
+    logger.report_scalar("loss", "val_loss", int(i), float(history.history["val_loss"][i]))
+
 
 # ✅ Save outputs
 model.save("outputs/final_model.h5")
