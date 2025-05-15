@@ -1,3 +1,5 @@
+# final_pipeline_controller.py
+
 from clearml import Task
 from clearml.automation.controller import PipelineController
 
@@ -31,7 +33,7 @@ pipe.add_step(
     base_task_name="final_step_baseline_train",
     parents=["final_step_preprocess"],
     parameter_override={
-        "Args/dataset_id": "${final_step_preprocess.id}"
+        "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c"
     },
     execution_queue="default"
 )
@@ -43,7 +45,7 @@ pipe.add_step(
     base_task_name="final_step_hpo",
     parents=["final_step_baseline_train"],
     parameter_override={
-        "Args/dataset_id": "${final_step_preprocess.id}",
+        "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c",
         "Args/baseline_task_id": "${final_step_baseline_train.id}"
     },
     execution_queue="default"
@@ -56,7 +58,7 @@ pipe.add_step(
     base_task_name="final_step_final_train",
     parents=["final_step_hpo"],
     parameter_override={
-        "Args/dataset_id": "${final_step_preprocess.id}",
+        "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c",
         "Args/hpo_task_id": "${final_step_hpo.id}"
     },
     execution_queue="default"
