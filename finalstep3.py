@@ -1,4 +1,4 @@
-# finalstep3.py (Baseline Training Script with Scalar Logging)
+# finalstep3.py
 
 from clearml import Task, Dataset
 import tensorflow as tf
@@ -7,56 +7,69 @@ from tensorflow.keras import layers, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.utils.multiclass import unique_labels
 import os, numpy as np, pickle, matplotlib.pyplot as plt, seaborn as sns
 
-# ✅ Init ClearML Task
+# ✅ Initialize ClearML Task
 task = Task.init(
     project_name="FinalProject",
     task_name="final_step_baseline_train",
     task_type=Task.TaskTypes.training
 )
 
-# ✅ Hyperparameters
-def_params = {
+# ✅ Hyperparameter defaults
+params = {
     "learning_rate": 0.001,
     "dropout": 0.4,
-    "epochs": 1,
+    "epochs": 3,
     "image_size": 160,
     "train_ratio": 0.1,
     "val_ratio": 0.5
 }
-params = task.connect(def_params)
+params = task.connect(params)
 
-# ✅ Dataset loading
+# ✅ Extract args
+lr = float(params["learning_rate"])
+dropout = float(params["dropout"])
+epochs = int(params["epochs"])
+img_size = int(params["image_size"])
+train_ratio = float(params["train_ratio"])
+val_ratio = float(params["val_ratio"])
+
+# ✅ Load dataset
 dataset_id = task.get_parameters().get("Args/dataset_id")
-dataset = Dataset.get(dataset_id=dataset_id)
+if dataset_id:
+    dataset = Dataset.get(dataset_id=dataset_id)
+else:
+    dataset = Dataset.get(dataset_name="final_processed_data_split", dataset_project="FinalProject", only_completed=True)
 dataset_path = dataset.get_local_copy()
+
 train_dir = os.path.join(dataset_path, "train")
 val_dir = os.path.join(dataset_path, "valid")
 test_dir = os.path.join(dataset_path, "test")
 
-# ✅ Image loading
+# ✅ Load image subset
 def load_subset(ds_path, ratio):
-    ds = tf.keras.preprocessing.image_dataset_from_directory(
-        ds_path, image_size=(params["image_size"], params["image_size"]), batch_size=32, shuffle=True
+    ds_full = tf.keras.preprocessing.image_dataset_from_directory(
+        ds_path, image_size=(img_size, img_size), batch_size=32, shuffle=True
     )
-    total = tf.data.experimental.cardinality(ds).numpy()
+    total = tf.data.experimental.cardinality(ds_full).numpy()
     subset = max(1, int(total * ratio))
-    return ds.take(subset).prefetch(tf.data.AUTOTUNE)
+    return ds_full.take(subset).prefetch(tf.data.AUTOTUNE), ds_full.class_names
 
-train_ds = load_subset(train_dir, params["train_ratio"])
-val_ds = load_subset(val_dir, params["val_ratio"])
+train_ds, class_names = load_subset(train_dir, train_ratio)
+val_ds, _ = load_subset(val_dir, val_ratio)
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    test_dir, image_size=(params["image_size"], params["image_size"]), batch_size=32, shuffle=False
+    test_dir, image_size=(img_size, img_size), batch_size=32, shuffle=False
 ).prefetch(tf.data.AUTOTUNE)
 
-class_names = tf.keras.preprocessing.image_dataset_from_directory(train_dir).class_names
 num_classes = len(class_names)
 
 # ✅ Build hybrid model
-inp = Input(shape=(params["image_size"], params["image_size"], 3))
+inp = Input(shape=(img_size, img_size, 3))
 mobilenet = MobileNetV2(include_top=False, weights='imagenet', input_tensor=inp)
 mobilenet.trainable = True
+
 densenet = DenseNet121(include_top=False, weights='imagenet', input_tensor=inp)
 densenet.trainable = False
 
@@ -65,25 +78,32 @@ d_out = layers.GlobalAveragePooling2D()(densenet.output)
 merged = layers.Concatenate()([m_out, d_out])
 x = layers.Dense(256, activation='relu')(merged)
 x = layers.BatchNormalization()(x)
-x = layers.Dropout(params["dropout"])(x)
+x = layers.Dropout(dropout)(x)
 out = layers.Dense(num_classes, activation='softmax')(x)
 
 model = Model(inputs=inp, outputs=out)
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=params["learning_rate"]),
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
 # ✅ Train model
 os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
-history = model.fit(train_ds, validation_data=val_ds, epochs=params["epochs"], callbacks=[checkpoint_cb])
 
-# ✅ Log scalar metrics manually
+history = model.fit(train_ds, validation_data=val_ds, epochs=epochs, callbacks=[checkpoint_cb])
+
+# ✅ Manually log scalars for HPO access
 logger = task.get_logger()
-for i in range(params["epochs"]):
-    if "accuracy" in history.history and "val_accuracy" in history.history:
-        logger.report_scalar("accuracy", "train_accuracy", i, history.history["accuracy"][i])
-        logger.report_scalar("accuracy", "val_accuracy", i, history.history["val_accuracy"][i])
+for i in range(epochs):
+    train_acc = history.history.get("accuracy", [0.0])[i]
+    val_acc = history.history.get("val_accuracy", [0.0])[i]
+    train_loss = history.history.get("loss", [0.0])[i]
+    val_loss = history.history.get("val_loss", [0.0])[i]
+
+    logger.report_scalar("accuracy", "train_accuracy", iteration=i, value=train_acc)
+    logger.report_scalar("accuracy", "val_accuracy", iteration=i, value=val_acc)
+    logger.report_scalar("loss", "train_loss", iteration=i, value=train_loss)
+    logger.report_scalar("loss", "val_loss", iteration=i, value=val_loss)
 
 # ✅ Save artifacts
 model.save("outputs/final_model.h5")
@@ -99,10 +119,13 @@ y_true = np.concatenate([y.numpy() for x, y in test_ds])
 y_pred_probs = model.predict(test_ds)
 y_pred = np.argmax(y_pred_probs, axis=1)
 
-report = classification_report(y_true, y_pred, target_names=class_names, zero_division=0)
+labels_present = sorted(unique_labels(y_true, y_pred))
+filtered_names = [class_names[i] for i in labels_present]
+report = classification_report(y_true, y_pred, target_names=filtered_names, zero_division=0)
+print(report)
 logger.report_text("📊 Classification Report:\n" + report)
 
-# ✅ Confusion matrix
+# ✅ Confusion Matrix
 cm = confusion_matrix(y_true, y_pred)
 plt.figure(figsize=(10, 8))
 sns.heatmap(cm, annot=True, fmt="d", xticklabels=class_names, yticklabels=class_names, cmap="Blues")
@@ -112,18 +135,20 @@ plt.ylabel("Actual")
 plt.savefig("outputs/confusion_matrix.png")
 task.upload_artifact("confusion_matrix", artifact_object="outputs/confusion_matrix.png")
 
-# ✅ Accuracy/loss plots
+# ✅ Training curves
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
-plt.plot(history.history['accuracy'], label="Train Acc")
-plt.plot(history.history['val_accuracy'], label="Val Acc")
+plt.plot(history.history.get('accuracy', []), label="Train Acc")
+plt.plot(history.history.get('val_accuracy', []), label="Val Acc")
 plt.title("Accuracy")
 plt.legend()
+
 plt.subplot(1, 2, 2)
-plt.plot(history.history['loss'], label="Train Loss")
-plt.plot(history.history['val_loss'], label="Val Loss")
+plt.plot(history.history.get('loss', []), label="Train Loss")
+plt.plot(history.history.get('val_loss', []), label="Val Loss")
 plt.title("Loss")
 plt.legend()
+
 plt.savefig("outputs/train_curves.png")
 task.upload_artifact("training_curves", artifact_object="outputs/train_curves.png")
 
