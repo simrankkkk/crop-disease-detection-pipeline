@@ -21,7 +21,7 @@ task = Task.init(
 params = {
     "learning_rate": 0.001,
     "dropout": 0.4,
-    "epochs": 3,
+    "epochs": 1,
     "image_size": 160,
     "train_ratio": 0.1,
     "val_ratio": 0.5
