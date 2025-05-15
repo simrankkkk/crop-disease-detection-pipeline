@@ -36,7 +36,14 @@ best_params = best_result["best_params"]
 
 lr = float(best_params["learning_rate"])
 dropout = float(best_params["dropout"])
-epochs = 2
+
+# ✅ Log hyperparameters to ClearML config
+task.set_parameter("General/learning_rate", lr)
+task.set_parameter("General/dropout", dropout)
+print(f"📌 Final training using best hyperparameters: lr={lr}, dropout={dropout}")
+task.get_logger().report_text(f"📌 Best Params: lr={lr}, dropout={dropout}")
+
+epochs = 5
 img_size = 160
 train_ratio = 0.1
 val_ratio = 0.5
