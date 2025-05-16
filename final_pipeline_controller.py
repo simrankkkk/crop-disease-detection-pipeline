@@ -26,17 +26,17 @@ pipe.add_step(
     execution_queue="default"
 )
 
-# STEP 2: Preprocess (pass fixed dataset ID directly)
 pipe.add_step(
     name="final_step_preprocess",
     base_task_project="FinalProject",
     base_task_name="final_step_preprocess",
     parents=["final_step_upload"],
     parameter_override={
-        "Args/dataset_id": "105163c10d0a4bbaa06055807084ec71"
+        "Args/dataset_id": "${final_step_upload.parameters.dataset_id}"
     },
     execution_queue="default"
 )
+
 
 # STEP 3: Baseline Training
 pipe.add_step(
