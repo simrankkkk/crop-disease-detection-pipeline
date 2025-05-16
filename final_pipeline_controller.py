@@ -17,7 +17,7 @@ pipe = PipelineController(
     version="1.0"
 )
 
-# STEP 1: Upload dataset (passes fixed dataset ID)
+# STEP 1: Upload dataset (dummy step for reference only)
 pipe.add_step(
     name="final_step_upload",
     base_task_project="FinalProject",
@@ -26,14 +26,14 @@ pipe.add_step(
     execution_queue="default"
 )
 
-# STEP 2: Preprocess
+# STEP 2: Preprocess (pass fixed dataset ID directly)
 pipe.add_step(
     name="final_step_preprocess",
     base_task_project="FinalProject",
     base_task_name="final_step_preprocess",
     parents=["final_step_upload"],
     parameter_override={
-        "Args/dataset_id": "${final_step_upload.parameters.dataset_id}"
+        "Args/dataset_id": "105163c10d0a4bbaa06055807084ec71"
     },
     execution_queue="default"
 )
