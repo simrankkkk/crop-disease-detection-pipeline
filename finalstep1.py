@@ -9,14 +9,12 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Use fixed dataset ID (already uploaded manually)
-params = {"dataset_id": "105163c10d0a4bbaa06055807084ec71"}
-params = task.connect(params)  # <-- ✅ Makes it accessible via pipeline parameter injection
+# ✅ Replace this with your actual dataset ID (or create new one if needed)
+# If you've already uploaded the dataset manually, just reference it:
+dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
 
-# ✅ Optional: confirm local access
-dataset = Dataset.get(dataset_id=params["dataset_id"])
+# ✅ Download dataset locally
 local_path = dataset.get_local_copy()
-print("✅ Dataset fetched locally:", local_path)
+print("✅ Dataset successfully fetched to local path:", local_path)
 
-print(f"📌 dataset_id connected to pipeline: {params['dataset_id']}")
 task.close()
