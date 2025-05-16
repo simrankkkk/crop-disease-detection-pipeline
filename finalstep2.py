@@ -7,20 +7,9 @@ from collections import defaultdict
 # ✅ Initialize task
 task = Task.init(project_name="FinalProject", task_name="final_step_preprocess")
 
-# ✅ Get dataset ID from previous step
-params = task.get_parameters()
-DATASET_ID = params.get("Args/dataset_id") or os.environ.get("DATASET_ID")
-
-# Optional hardcoded fallback for debugging outside pipeline
-if not DATASET_ID:
-    DATASET_ID = "105163c10d0a4bbaa06055807084ec71"  # fallback raw dataset ID
-    print("⚠️ Warning: Using fallback dataset_id!")
-
-if not DATASET_ID:
-    raise ValueError("❌ No dataset_id provided via Args or environment.")
-
+# Load the original dataset from ClearML
+DATASET_ID = "105163c10d0a4bbaa06055807084ec71"
 dataset = Dataset.get(dataset_id=DATASET_ID)
-
 local_path = dataset.get_local_copy()
 print(f"📂 Dataset downloaded to: {local_path}")
 
