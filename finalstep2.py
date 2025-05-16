@@ -77,7 +77,4 @@ new_dataset.upload()
 new_dataset.finalize()
 print("✅ Dataset successfully split and uploaded.")
 
-# ✅ Tell pipeline to pass the dataset ID to next steps
-task.set_output_model(new_dataset.id)
-
 task.close()
