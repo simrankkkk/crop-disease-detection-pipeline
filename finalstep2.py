@@ -7,18 +7,12 @@ import random
 from collections import defaultdict
 
 # ✅ Initialize ClearML Task
-task = Task.init(
-    project_name="FinalProject",
-    task_name="final_step_preprocess",
-    task_type=Task.TaskTypes.data_processing
-)
+task = Task.init(project_name="FinalProject", task_name="final_step_preprocess")
 
-# ✅ Extract dataset ID directly as a string
-dataset_id = task.get_parameters().get("Args/dataset_id")
-if not dataset_id:
-    raise ValueError("❌ dataset_id was not provided.")
-
-dataset = Dataset.get(dataset_id=dataset_id)
+# ✅ Get the dataset ID from previous step (upload)
+params = task.get_parameters()
+DATASET_ID = params.get("Args/dataset_id", "105163c10d0a4bbaa06055807084ec71")
+dataset = Dataset.get(dataset_id=DATASET_ID)
 local_path = dataset.get_local_copy()
 print(f"📂 Dataset downloaded to: {local_path}")
 
@@ -82,5 +76,8 @@ new_dataset.add_files(path=output_base)
 new_dataset.upload()
 new_dataset.finalize()
 print("✅ Dataset successfully split and uploaded.")
+
+# ✅ Tell pipeline to pass the dataset ID to next steps
+task.set_output_model(new_dataset.id)
 
 task.close()
