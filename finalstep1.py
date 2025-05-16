@@ -17,7 +17,7 @@ local_path = dataset.get_local_copy()
 print("✅ Dataset successfully fetched to local path:", local_path)
 
 # ✅ Pass dataset ID as a pipeline parameter
-task.set_parameter("dataset_id", dataset.id)  # <- This makes it available downstream
+task.upload_artifact(name="dataset_id_artifact", artifact_object=dataset.id)
 
 # ✅ Done
 print(f"📌 Logged dataset_id to pipeline: {dataset.id}")
