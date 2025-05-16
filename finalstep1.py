@@ -9,16 +9,14 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Load or reference dataset that was manually uploaded or registered earlier
-dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
+# ✅ Instead of uploading, pass the fixed dataset ID from GDrive-uploaded ClearML dataset
+dataset_id = "105163c10d0a4bbaa06055807084ec71"
+task.set_parameter("dataset_id", dataset_id)
 
-# ✅ Optionally download locally to trigger the caching
+# ✅ Optional: fetch locally (if needed for other debugging purposes)
+dataset = Dataset.get(dataset_id=dataset_id)
 local_path = dataset.get_local_copy()
 print("✅ Dataset successfully fetched to local path:", local_path)
 
-# ✅ Pass dataset ID as a pipeline parameter
-task.upload_artifact(name="dataset_id_artifact", artifact_object=dataset.id)
-
-# ✅ Done
-print(f"📌 Logged dataset_id to pipeline: {dataset.id}")
+print(f"📌 Logged fixed dataset_id to pipeline: {dataset_id}")
 task.close()
