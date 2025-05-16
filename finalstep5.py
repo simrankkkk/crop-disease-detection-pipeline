@@ -102,13 +102,18 @@ os.makedirs("outputs", exist_ok=True)
 checkpoint_cb = ModelCheckpoint("outputs/best_model.h5", save_best_only=True, monitor="val_accuracy", mode="max")
 history = model.fit(train_ds, validation_data=val_ds, epochs=epochs, callbacks=[checkpoint_cb])
 
-# ✅ Log scalars manually
 logger = task.get_logger()
 for i in range(epochs):
-    logger.report_scalar("accuracy", "train_accuracy", int(i), float(history.history["accuracy"][i]))
-    logger.report_scalar("accuracy", "val_accuracy", int(i), float(history.history["val_accuracy"][i]))
-    logger.report_scalar("loss", "train_loss", int(i), float(history.history["loss"][i]))
-    logger.report_scalar("loss", "val_loss", int(i), float(history.history["val_loss"][i]))
+    train_acc = history.history.get("accuracy", [0.0])[i]
+    val_acc = history.history.get("val_accuracy", [0.0])[i]
+    train_loss = history.history.get("loss", [0.0])[i]
+    val_loss = history.history.get("val_loss", [0.0])[i]
+
+    logger.report_scalar("accuracy", "train_accuracy", iteration=i, value=train_acc)
+    logger.report_scalar("accuracy", "val_accuracy", iteration=i, value=val_acc)
+    logger.report_scalar("loss", "train_loss", iteration=i, value=train_loss)
+    logger.report_scalar("loss", "val_loss", iteration=i, value=val_loss)
+
 
 
 # ✅ Save outputs
