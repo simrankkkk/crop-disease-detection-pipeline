@@ -1,3 +1,5 @@
+# finalstep1.py
+
 from clearml import Dataset, Task
 
 # ✅ Initialize ClearML Task
@@ -7,16 +9,16 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Replace this with your actual dataset ID (or create new one if needed)
+# ✅ Load or reference dataset that was manually uploaded or registered earlier
 dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
 
+# ✅ Optionally download locally to trigger the caching
 local_path = dataset.get_local_copy()
 print("✅ Dataset successfully fetched to local path:", local_path)
 
-# ─── NEW ───────────────────────────────────────────────────────────────────────
-# expose the ID so the pipeline can reference it
-task.set_parameter("dataset_id", dataset.id)
-task.get_logger().report_text(f"🔖 dataset_id = {dataset.id}")
+# ✅ Pass dataset ID as a pipeline parameter
+task.set_parameter("dataset_id", dataset.id)  # <- This makes it available downstream
 
-# and close the task
+# ✅ Done
+print(f"📌 Logged dataset_id to pipeline: {dataset.id}")
 task.close()
