@@ -33,7 +33,7 @@ pipe.add_step(
     base_task_name="final_step_preprocess",
     parents=["final_step_upload"],
     parameter_override={
-        "Args/dataset_id": "${final_step_upload.parameters.dataset_id}"
+        "Args/dataset_id": "${final_step_upload.artifacts.dataset_id_artifact}"
     },
     execution_queue="default"
 )
