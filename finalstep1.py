@@ -9,14 +9,14 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Instead of uploading, pass the fixed dataset ID from GDrive-uploaded ClearML dataset
-dataset_id = "105163c10d0a4bbaa06055807084ec71"
-task.set_parameter("dataset_id", dataset_id)
+# ✅ Use fixed dataset ID (already uploaded manually)
+params = {"dataset_id": "105163c10d0a4bbaa06055807084ec71"}
+params = task.connect(params)  # <-- ✅ Makes it accessible via pipeline parameter injection
 
-# ✅ Optional: fetch locally (if needed for other debugging purposes)
-dataset = Dataset.get(dataset_id=dataset_id)
+# ✅ Optional: confirm local access
+dataset = Dataset.get(dataset_id=params["dataset_id"])
 local_path = dataset.get_local_copy()
-print("✅ Dataset successfully fetched to local path:", local_path)
+print("✅ Dataset fetched locally:", local_path)
 
-print(f"📌 Logged fixed dataset_id to pipeline: {dataset_id}")
+print(f"📌 dataset_id connected to pipeline: {params['dataset_id']}")
 task.close()
