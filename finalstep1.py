@@ -7,15 +7,8 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Reference your uploaded raw dataset
+# ✅ Replace this with your actual dataset ID (or create new one if needed)
 dataset = Dataset.get(dataset_id="105163c10d0a4bbaa06055807084ec71")
 
-# ✅ Optionally download locally (for debug or inspection)
 local_path = dataset.get_local_copy()
 print("✅ Dataset successfully fetched to local path:", local_path)
-
-# ✅ Pass dataset_id to next step via pipeline
-task.set_parameter("Args/dataset_id", dataset.id)
-task.get_logger().report_text(f"📌 dataset_id registered for pipeline: {dataset.id}")
-
-task.close()
