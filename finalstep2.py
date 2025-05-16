@@ -13,12 +13,10 @@ task = Task.init(
     task_type=Task.TaskTypes.data_processing
 )
 
-# ✅ Extract dataset_id from artifact (passed from previous step)
-artifact = task.get_parameters().get("Args/dataset_id")
-if isinstance(artifact, dict) and "preview" in artifact:
-    dataset_id = artifact["preview"]
-else:
-    raise ValueError("Invalid dataset_id artifact format")
+# ✅ Extract dataset ID directly as a string
+dataset_id = task.get_parameters().get("Args/dataset_id")
+if not dataset_id:
+    raise ValueError("❌ dataset_id was not provided.")
 
 dataset = Dataset.get(dataset_id=dataset_id)
 local_path = dataset.get_local_copy()
