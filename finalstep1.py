@@ -15,7 +15,7 @@ local_path = dataset.get_local_copy()
 print("✅ Dataset successfully fetched to local path:", local_path)
 
 # ✅ Pass dataset_id to next step via pipeline
-task.set_parameter("dataset_id", dataset.id)
+task.set_parameter("Args/dataset_id", dataset.id)
 task.get_logger().report_text(f"📌 dataset_id registered for pipeline: {dataset.id}")
 
 task.close()
