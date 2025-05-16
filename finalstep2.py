@@ -7,12 +7,20 @@ import random
 from collections import defaultdict
 
 # ✅ Initialize ClearML Task
-task = Task.init(project_name="FinalProject", task_name="final_step_preprocess")
+task = Task.init(
+    project_name="FinalProject",
+    task_name="final_step_preprocess",
+    task_type=Task.TaskTypes.data_processing
+)
 
-# ✅ Get the dataset ID from previous step (upload)
-params = task.get_parameters()
-DATASET_ID = params.get("Args/dataset_id", "105163c10d0a4bbaa06055807084ec71")
-dataset = Dataset.get(dataset_id=DATASET_ID)
+# ✅ Extract dataset_id from artifact (passed from previous step)
+artifact = task.get_parameters().get("Args/dataset_id")
+if isinstance(artifact, dict) and "preview" in artifact:
+    dataset_id = artifact["preview"]
+else:
+    raise ValueError("Invalid dataset_id artifact format")
+
+dataset = Dataset.get(dataset_id=dataset_id)
 local_path = dataset.get_local_copy()
 print(f"📂 Dataset downloaded to: {local_path}")
 
