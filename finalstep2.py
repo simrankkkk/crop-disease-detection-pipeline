@@ -76,5 +76,5 @@ new_dataset.add_files(path=output_base)
 new_dataset.upload()
 new_dataset.finalize()
 print("✅ Dataset successfully split and uploaded.")
-
+task.set_parameter("dataset_id", new_dataset.id)  # ✅ ADD THIS
 task.close()
