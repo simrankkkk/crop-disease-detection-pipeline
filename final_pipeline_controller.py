@@ -16,12 +16,12 @@ pipe = PipelineController(
 )
 
 # STEP 1: Upload Dataset
-pipe.add_step(
+'''pipe.add_step(
     name="final_step_upload",
     base_task_project="FinalProject",
     base_task_name="final_step_upload",
     execution_queue="default"
-)
+)'''
 
 # STEP 2: Preprocess
 pipe.add_step(
