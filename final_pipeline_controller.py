@@ -1,23 +1,21 @@
-# final_pipeline_controller.py
-
 from clearml import Task
 from clearml.automation.controller import PipelineController
 
-# ✅ Register this pipeline for visibility
+# ✅ Register pipeline in ClearML
 Task.init(
     project_name="FinalProject",
     task_name="__pipeline_controller_entrypoint__",
     task_type=Task.TaskTypes.testing
 ).close()
 
-# ✅ Define the controller pipeline
+# ✅ Define the controller
 pipe = PipelineController(
     name="FinalPipeline",
     project="FinalProject",
     version="1.0"
 )
 
-# STEP 1: Upload dataset (dummy step for reference only)
+# STEP 1: Upload (dummy, for reference only — does NOT return dataset_id)
 pipe.add_step(
     name="final_step_upload",
     base_task_project="FinalProject",
@@ -26,19 +24,19 @@ pipe.add_step(
     execution_queue="default"
 )
 
+# STEP 2: Preprocess (hardcoded dataset ID)
 pipe.add_step(
     name="final_step_preprocess",
     base_task_project="FinalProject",
     base_task_name="final_step_preprocess",
     parents=["final_step_upload"],
     parameter_override={
-        "Args/dataset_id": "${final_step_upload.parameters.dataset_id}"
+        "Args/dataset_id": "105163c10d0a4bbaa06055807084ec71"  # ✅ Fixed dataset ID
     },
     execution_queue="default"
 )
 
-
-# STEP 3: Baseline Training
+# STEP 3: Baseline Train (uses split dataset ID from Step 2)
 pipe.add_step(
     name="final_step_baseline_train",
     base_task_project="FinalProject",
@@ -76,5 +74,5 @@ pipe.add_step(
     execution_queue="default"
 )
 
-# ✅ Start the pipeline
+# ✅ Start pipeline
 pipe.start()
