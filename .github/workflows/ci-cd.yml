@@ -1,0 +1,40 @@
+name: ClearML ML Pipeline (FinalProject)
+
+on:
+  push:
+    branches: [ "feature-cicd" ]
+  pull_request:
+    branches: [ "feature-cicd" ]
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      CLEARML_API_ACCESS_KEY: ${{ secrets.CLEARML_API_ACCESS_KEY }}
+      CLEARML_API_SECRET_KEY: ${{ secrets.CLEARML_API_SECRET_KEY }}
+      CLEARML_API_HOST: ${{ secrets.CLEARML_API_HOST }}
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 📦 Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install clearml tensorflow scikit-learn matplotlib seaborn
+
+    - name: ▶️ Run Final Pipeline Controller
+      run: python final_pipeline_controller.py
+
+    - name: 📤 Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: output-artifacts
+        path: outputs/
