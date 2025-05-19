@@ -1,11 +1,9 @@
-numpy
-
+numpy==1.24.3
 tensorflow==2.19.0
-keras==3.9.2
+keras==3.0.2
 matplotlib==3.10.1
 seaborn==0.13.2
 clearml>=1.13.0
 optuna
-
 scikit-learn==1.6.1
 opencv-python==4.11.0.86
