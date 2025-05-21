@@ -15,9 +15,10 @@ controller = Task.init(
     project_name="FinalProject",
     task_name="final_step_hpo",
     task_type=Task.TaskTypes.controller,
-    parent=args.parent_id
 )
-
+if args.parent_id:
+    task.set_parent(args.parent_id)
+    
 # ✅ Define manual hyperparameter combinations
 param_sets = [
     {"learning_rate": 0.001, "dropout": 0.3},
