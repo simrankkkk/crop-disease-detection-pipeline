@@ -1,24 +1,14 @@
-# finalstep4.py
-
-import argparse
+from clearml import Task
 import json
 import time
-from clearml import Task
 
-# ✅ Parse parent_id argument
-parser = argparse.ArgumentParser()
-parser.add_argument("--parent_id", type=str, default=None, help="Parent ClearML Task ID")
-args = parser.parse_args()
-
-# ✅ Start HPO controller task with parent
+# ✅ Start HPO controller task
 controller = Task.init(
     project_name="FinalProject",
     task_name="final_step_hpo",
-    task_type=Task.TaskTypes.controller,
+    task_type=Task.TaskTypes.controller
 )
-if args.parent_id:
-    task.set_parent(args.parent_id)
-    
+
 # ✅ Define manual hyperparameter combinations
 param_sets = [
     {"learning_rate": 0.001, "dropout": 0.3},
