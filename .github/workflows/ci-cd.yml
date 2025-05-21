@@ -1,4 +1,8 @@
-name: ClearML ML Pipeline (Direct Execution)
+name: 🔗 Create Master Pipeline Task
+id: create_pipeline_task
+run: |
+    echo "Creating pipeline root task..."
+    python create_parent_task.py
 
 on:
   push:
