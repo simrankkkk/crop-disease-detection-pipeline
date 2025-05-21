@@ -5,11 +5,21 @@ import os
 import shutil
 import random
 from collections import defaultdict
+import argparse
 
-# ✅ Initialize ClearML Task
-task = Task.init(project_name="FinalProject", task_name="final_step_preprocess")
+# ✅ Parse command-line argument for parent_id
+parser = argparse.ArgumentParser()
+parser.add_argument("--parent_id", type=str, default=None, help="Parent ClearML Task ID")
+args = parser.parse_args()
 
-# ✅ Get the dataset ID from previous step (upload)
+# ✅ Initialize ClearML Task with optional parent
+task = Task.init(
+    project_name="FinalProject",
+    task_name="final_step_preprocess",
+    parent=args.parent_id
+)
+
+# ✅ Get the dataset ID from parameters
 params = task.get_parameters()
 DATASET_ID = params.get("Args/dataset_id", "105163c10d0a4bbaa06055807084ec71")
 dataset = Dataset.get(dataset_id=DATASET_ID)
