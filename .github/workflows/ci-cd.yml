@@ -1,4 +1,4 @@
-name: ClearML ML Pipeline (FinalProject)
+name: ClearML ML Pipeline (Direct Run)
 
 on:
   push:
@@ -28,13 +28,16 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
-        pip install clearml tensorflow scikit-learn matplotlib seaborn
+        pip install clearml
 
-    - name: ▶️ Run Final Pipeline Controller
-      run: python final_pipeline_controller.py
+    - name: 🚀 Run Preprocessing
+      run: python finalstep2.py
 
-    - name: 📤 Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: output-artifacts
-        path: outputs/
+    - name: 🧪 Run Baseline Training
+      run: python finalstep3.py
+
+    - name: 🔁 Run HPO
+      run: python finalstep4.py
+
+    - name: 🎯 Run Final Training
+      run: python finalstep5.py
