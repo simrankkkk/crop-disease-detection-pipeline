@@ -62,5 +62,5 @@ pipe.add_step(
     }
 )
 
-# Start the pipeline — this will execute each step right here, in-process
-pipe.start()
+# Start the pipeline **locally**, executing each step in-process
+pipe.start_locally(run_pipeline_steps_locally=True)
