@@ -21,8 +21,9 @@ task = Task.init(
     project_name="FinalProject",
     task_name="final_step_final_train",
     task_type=Task.TaskTypes.training,
-    parent=args.parent_id
 )
+if args.parent_id:
+    task.set_parent(args.parent_id)
 
 
 # ✅ Pull pipeline parameters
