@@ -34,7 +34,9 @@ jobs:
       id: create_pipeline_task
       run: |
         echo "Creating pipeline root task..."
-        echo "PARENT_ID=$(python -c '
+        echo "PARENT_ID=$(python -c 'from clearml import Task; t=Task.init(project_name=\"FinalProject\", task_name=\"FinalPipelineGroup\", task_type=Task.TaskTypes.training); tid=t.id; t.close(); print(tid)')" >> $GITHUB_ENV
+
+        
 from clearml import Task
 task = Task.init(project_name=\"FinalProject\", task_name=\"FinalPipelineGroup\", task_type=Task.TaskTypes.training)
 print(task.id)
