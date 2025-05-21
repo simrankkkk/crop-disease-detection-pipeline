@@ -3,12 +3,14 @@
 from clearml import Task
 from clearml.automation.controller import PipelineController
 
+# Register a “head” task so ClearML knows this is a pipeline
 Task.init(
     project_name="FinalProject",
     task_name="__pipeline_direct_preprocess__",
     task_type=Task.TaskTypes.testing
 ).close()
 
+# Build the pipeline controller
 pipe = PipelineController(
     name="FinalPipeline",
     project="FinalProject",
@@ -22,8 +24,7 @@ pipe.add_step(
     base_task_name="final_step_preprocess",
     parameter_override={
         "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c"
-    },
-    execution_queue="default"
+    }
 )
 
 # STEP 3: Baseline Train
@@ -34,8 +35,7 @@ pipe.add_step(
     parents=["final_step_preprocess"],
     parameter_override={
         "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c"
-    },
-    execution_queue="default"
+    }
 )
 
 # STEP 4: HPO
@@ -47,8 +47,7 @@ pipe.add_step(
     parameter_override={
         "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c",
         "Args/baseline_task_id": "${final_step_baseline_train.id}"
-    },
-    execution_queue="default"
+    }
 )
 
 # STEP 5: Final Training
@@ -60,8 +59,8 @@ pipe.add_step(
     parameter_override={
         "Args/dataset_id": "81e8c009a1f04dc583f7ec872ed76e5c",
         "Args/hpo_task_id": "${final_step_hpo.id}"
-    },
-    execution_queue="default"
+    }
 )
 
+# Start the pipeline — this will execute each step right here, in-process
 pipe.start()
