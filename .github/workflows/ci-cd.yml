@@ -33,14 +33,14 @@ jobs:
     - name: 🔗 Create Master Pipeline Task
       run: python create_parent_task.py
 
-    - name: 🚀 Step 2: Run Preprocessing
-      run: python finalstep2.py --parent_id ${{ env.PARENT_ID }}
+    - name: 🚀 Step 2:Run Preprocessing
+      run: python finalstep2.py --parent_id $PARENT_ID
 
-    - name: 🧪 Step 3: Run Baseline Training
-      run: python finalstep3.py --parent_id ${{ env.PARENT_ID }}
+    - name: 🧪 Step 3:Run Baseline Training
+      run: python finalstep3.py --parent_id $PARENT_ID
 
-    - name: 🔁 Step 4: Run HPO
-      run: python finalstep4.py --parent_id ${{ env.PARENT_ID }}
+    - name: 🔁 Step 4:Run HPO
+      run: python finalstep4.py --parent_id $PARENT_ID
 
-    - name: 🎯 Step 5: Run Final Training
-      run: python finalstep5.py --parent_id ${{ env.PARENT_ID }}
+    - name: 🎯 Step 5:Run Final Training
+      run: python finalstep5.py --parent_id $PARENT_ID
