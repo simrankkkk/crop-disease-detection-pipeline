@@ -1,8 +1,4 @@
-name: 🔗 Create Master Pipeline Task
-id: create_pipeline_task
-run: |
-    echo "Creating pipeline root task..."
-    python create_parent_task.py
+name: ClearML ML Pipeline (Direct Execution)
 
 on:
   push:
@@ -35,17 +31,7 @@ jobs:
         pip install clearml tensorflow matplotlib seaborn scikit-learn opencv-python
 
     - name: 🔗 Create Master Pipeline Task
-      id: create_pipeline_task
-      run: |
-        echo "Creating pipeline root task..."
-        echo "PARENT_ID=$(python -c 'from clearml import Task; t=Task.init(project_name=\"FinalProject\", task_name=\"FinalPipelineGroup\", task_type=Task.TaskTypes.training); tid=t.id; t.close(); print(tid)')" >> $GITHUB_ENV
-
-        
-from clearml import Task
-task = Task.init(project_name=\"FinalProject\", task_name=\"FinalPipelineGroup\", task_type=Task.TaskTypes.training)
-print(task.id)
-task.close()
-')" >> $GITHUB_ENV
+      run: python create_parent_task.py
 
     - name: 🚀 Step 2: Run Preprocessing
       run: python finalstep2.py --parent_id ${{ env.PARENT_ID }}
