@@ -1,4 +1,4 @@
-name: ClearML ML Pipeline (Direct Run)
+name: ClearML ML Pipeline (Direct Execution)
 
 on:
   push:
@@ -16,10 +16,10 @@ jobs:
       CLEARML_API_HOST: ${{ secrets.CLEARML_API_HOST }}
 
     steps:
-    - name: 📥 Checkout Code
+    - name: 📥 Checkout Repository
       uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
+    - name: 🐍 Set Up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
@@ -28,16 +28,27 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
-        pip install clearml
+        pip install clearml tensorflow matplotlib seaborn scikit-learn opencv-python
 
-    - name: 🚀 Run Preprocessing
-      run: python finalstep2.py
+    - name: 🔗 Create Master Pipeline Task
+      id: create_pipeline_task
+      run: |
+        echo "Creating pipeline root task..."
+        echo "PARENT_ID=$(python -c '
+from clearml import Task
+task = Task.init(project_name=\"FinalProject\", task_name=\"FinalPipelineGroup\", task_type=Task.TaskTypes.training)
+print(task.id)
+task.close()
+')" >> $GITHUB_ENV
 
-    - name: 🧪 Run Baseline Training
-      run: python finalstep3.py
+    - name: 🚀 Step 2: Run Preprocessing
+      run: python finalstep2.py --parent_id ${{ env.PARENT_ID }}
 
-    - name: 🔁 Run HPO
-      run: python finalstep4.py
+    - name: 🧪 Step 3: Run Baseline Training
+      run: python finalstep3.py --parent_id ${{ env.PARENT_ID }}
 
-    - name: 🎯 Run Final Training
-      run: python finalstep5.py
+    - name: 🔁 Step 4: Run HPO
+      run: python finalstep4.py --parent_id ${{ env.PARENT_ID }}
+
+    - name: 🎯 Step 5: Run Final Training
+      run: python finalstep5.py --parent_id ${{ env.PARENT_ID }}
