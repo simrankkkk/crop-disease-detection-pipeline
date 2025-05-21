@@ -1,5 +1,5 @@
-# .github/workflows/clearml-ci-cd.yml
-name: 🚀 CI/CD: Trigger ClearML Pipeline
+# .github/workflows/ci-cd.yml
+name: "🚀 CI/CD: Trigger ClearML Pipeline"
 
 on:
   push:
@@ -10,29 +10,25 @@ jobs:
   trigger-clearml-pipeline:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout repository
+      - name: "📥 Checkout repository"
         uses: actions/checkout@v3
 
-      - name: 🐍 Set up Python 3.10
+      - name: "🐍 Set up Python 3.10"
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 📦 Install Python dependencies
+      - name: "📦 Install Python dependencies"
         run: |
           python -m pip install --upgrade pip
-          # if you have other deps, install them here
           pip install clearml
 
-      - name: 🔑 Configure ClearML credentials
-        # these must be configured in your repo's Settings → Secrets
+      - name: "🔑 Configure ClearML credentials"
         env:
           CLEARML_API_HOST: ${{ secrets.CLEARML_API_HOST }}
           CLEARML_API_ACCESS_KEY: ${{ secrets.CLEARML_API_ACCESS_KEY }}
           CLEARML_API_SECRET_KEY: ${{ secrets.CLEARML_API_SECRET_KEY }}
-        run: |
-          echo "✅ ClearML credentials loaded"
+        run: echo "✅ ClearML credentials loaded"
 
-      - name: 🚦 Trigger ClearML pipeline
-        run: |
-          python final_pipeline_controller.py
+      - name: "🚦 Trigger ClearML pipeline"
+        run: python final_pipeline_controller.py
