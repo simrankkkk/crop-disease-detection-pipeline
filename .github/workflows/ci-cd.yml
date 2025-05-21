@@ -1,6 +1,5 @@
 # .github/workflows/ci-cd.yml
 name: "🚀 CI/CD: Trigger ClearML Pipeline"
-
 on:
   push:
     branches:
