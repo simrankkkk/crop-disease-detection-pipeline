@@ -1,5 +1,6 @@
 # finalstep5.py
 
+import argparse
 from clearml import Task, Dataset
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV2, DenseNet121
@@ -10,12 +11,19 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 import os, numpy as np, pickle, matplotlib.pyplot as plt, seaborn as sns, json
 
-# ✅ Start ClearML Task
+# ✅ Parse parent_id
+parser = argparse.ArgumentParser()
+parser.add_argument("--parent_id", type=str, default=None, help="Parent ClearML Task ID")
+args = parser.parse_args()
+
+# ✅ Start ClearML Task with parent
 task = Task.init(
     project_name="FinalProject",
     task_name="final_step_final_train",
-    task_type=Task.TaskTypes.training
+    task_type=Task.TaskTypes.training,
+    parent=args.parent_id
 )
+
 
 # ✅ Pull pipeline parameters
 params = task.get_parameters()
