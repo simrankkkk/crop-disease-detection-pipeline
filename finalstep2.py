@@ -16,9 +16,11 @@ args = parser.parse_args()
 task = Task.init(
     project_name="FinalProject",
     task_name="final_step_preprocess",
-    parent=args.parent_id
 )
 
+if args.parent_id:
+    task.set_parent(args.parent_id)
+    
 # ✅ Get the dataset ID from parameters
 params = task.get_parameters()
 DATASET_ID = params.get("Args/dataset_id", "105163c10d0a4bbaa06055807084ec71")
