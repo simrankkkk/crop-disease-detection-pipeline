@@ -21,9 +21,10 @@ task = Task.init(
     project_name="FinalProject",
     task_name="final_step_baseline_train",
     task_type=Task.TaskTypes.training,
-    parent=args.parent_id
 )
-
+if args.parent_id:
+    task.set_parent(args.parent_id)
+    
 # ✅ Hyperparameter defaults
 params = {
     "learning_rate": 0.001,
