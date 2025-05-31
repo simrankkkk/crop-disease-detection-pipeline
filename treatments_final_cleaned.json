@@ -1,0 +1,1408 @@
+{
+    "Apple___Apple_scab": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Apple___Black_rot": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Carbendazim",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 4,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Apple___Cedar_apple_rust": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Chlorothalonil",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 5,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Apple___healthy": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Blueberry___healthy": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Leaf curling",
+            "Black lesions",
+            "Stem cankers"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 4,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Cherry_(including_sour)___Powdery_mildew": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 5,
+        "notes": "Ensure adequate spacing between plants to improve air circulation."
+    },
+    "Cherry_(including_sour)___healthy": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Neem oil",
+            "Potassium bicarbonate",
+            "Serenade ASO"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 5,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Bordeaux mixture",
+            "Garlic oil",
+            "Milk spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 3,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Corn_(maize)___Common_rust_": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Bordeaux mixture",
+            "Garlic oil",
+            "Milk spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Corn_(maize)___Northern_Leaf_Blight": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Wilting",
+            "Mosaic pattern",
+            "Stunted growth"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Corn_(maize)___healthy": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Chlorothalonil",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Grape___Black_rot": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 4,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Grape___Esca_(Black_Measles)": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Carbendazim",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 2,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Grape___healthy": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Orange___Haunglongbing_(Citrus_greening)": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 4,
+        "notes": "Ensure adequate spacing between plants to improve air circulation."
+    },
+    "Peach___Bacterial_spot": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Bordeaux mixture",
+            "Garlic oil",
+            "Milk spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Harmful to bees; avoid use near hives."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Peach___healthy": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Trichoderma harzianum",
+            "Compost tea",
+            "Bio-fungicide mix"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Low toxicity to pollinators when applied at dusk."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 3,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Pepper,_bell___Bacterial_spot": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Bordeaux mixture",
+            "Garlic oil",
+            "Milk spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Low toxicity to pollinators when applied at dusk."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 1,
+        "notes": "Avoid planting the same crop in the same location every year."
+    },
+    "Pepper,_bell___healthy": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 4,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Potato___Early_blight": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Wilting",
+            "Mosaic pattern",
+            "Stunted growth"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Neem oil",
+            "Potassium bicarbonate",
+            "Serenade ASO"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 3,
+        "notes": "Avoid planting the same crop in the same location every year."
+    },
+    "Potato___Late_blight": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 3,
+        "notes": "Avoid planting the same crop in the same location every year."
+    },
+    "Potato___healthy": {
+        "disease_type": "Viral",
+        "symptoms": [
+            "Leaf curling",
+            "Black lesions",
+            "Stem cankers"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Neem oil",
+            "Potassium bicarbonate",
+            "Serenade ASO"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Low toxicity to pollinators when applied at dusk."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Raspberry___healthy": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Carbendazim",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 4,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Soybean___healthy": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Chlorothalonil",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Avoid inhalation; use a mask and gloves.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Squash___Powdery_mildew": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Leaf curling",
+            "Black lesions",
+            "Stem cankers"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Carbendazim",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Neem oil",
+            "Potassium bicarbonate",
+            "Serenade ASO"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 1,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Strawberry___Leaf_scorch": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 4,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Strawberry___healthy": {
+        "disease_type": "Viral",
+        "symptoms": [
+            "Wilting",
+            "Mosaic pattern",
+            "Stunted growth"
+        ],
+        "causal_agent": "Tomato mosaic virus",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 1,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Tomato___Bacterial_spot": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Low toxicity to pollinators when applied at dusk."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 1,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Tomato___Early_blight": {
+        "disease_type": "Viral",
+        "symptoms": [
+            "Leaf curling",
+            "Black lesions",
+            "Stem cankers"
+        ],
+        "causal_agent": "Physiological disorder",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 5,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Tomato___Late_blight": {
+        "disease_type": "Viral",
+        "symptoms": [
+            "Leaf scorch",
+            "Sunburn",
+            "Nutrient deficiency symptoms"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Imidacloprid",
+        "alternative_treatments": [
+            "Neem oil",
+            "Potassium bicarbonate",
+            "Serenade ASO"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 3,
+        "notes": "Avoid planting the same crop in the same location every year."
+    },
+    "Tomato___Leaf_Mold": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Wilting",
+            "Mosaic pattern",
+            "Stunted growth"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Chlorothalonil",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 2,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Tomato___Septoria_leaf_spot": {
+        "disease_type": "Viral",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Alternaria solani",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Malathion",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 5,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    },
+    "Tomato___Spider_mites Two-spotted_spider_mite": {
+        "disease_type": "Pest-related",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Carbendazim",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wash hands thoroughly after use.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "Kenya",
+            "Canada"
+        ],
+        "severity_level": 1,
+        "notes": "Use clean, sterilized tools to prevent contamination."
+    },
+    "Tomato___Target_Spot": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Wilting",
+            "Mosaic pattern",
+            "Stunted growth"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Copper oxychloride",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Safe for bees if used correctly."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 5,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+        "disease_type": "Fungal",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Xanthomonas campestris",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Not applicable",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Neem Bliss",
+            "Azadirachtin"
+        ],
+        "toxicity_info": {
+            "human_safety": "Apply only in well-ventilated areas.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 4,
+        "notes": "Regular monitoring and early intervention can reduce disease spread."
+    },
+    "Tomato___Tomato_mosaic_virus": {
+        "disease_type": "Bacterial",
+        "symptoms": [
+            "Chewed leaves",
+            "Insect holes",
+            "Sticky residue on leaves"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Captan",
+        "recommended_insecticide": "Spinosad",
+        "alternative_treatments": [
+            "Hydrogen peroxide",
+            "Chamomile extract",
+            "Spinosad"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Daconil",
+            "Fungonil"
+        ],
+        "toxicity_info": {
+            "human_safety": "Do not ingest; keep out of reach of children.",
+            "bee_safety": "Apply when pollinators are not active (early morning or late evening)."
+        },
+        "organic_approved": true,
+        "region_suitability": [
+            "Brazil",
+            "Australia"
+        ],
+        "severity_level": 4,
+        "notes": "Ensure adequate spacing between plants to improve air circulation."
+    },
+    "Tomato___healthy": {
+        "disease_type": "Abiotic",
+        "symptoms": [
+            "Yellowing of leaves",
+            "Spots on leaves",
+            "Premature fruit drop"
+        ],
+        "causal_agent": "Aphid infestation",
+        "recommended_pesticide": "Mancozeb",
+        "recommended_insecticide": "Neem oil",
+        "alternative_treatments": [
+            "Bacillus subtilis",
+            "Copper hydroxide",
+            "Sulfur spray"
+        ],
+        "application_instructions": "Apply treatment early in the day and repeat every 7 days.",
+        "preventive_measures": [
+            "Crop rotation",
+            "Proper irrigation",
+            "Sanitize tools"
+        ],
+        "brand_suggestions": [
+            "Bonide",
+            "Southern Ag"
+        ],
+        "toxicity_info": {
+            "human_safety": "Wear gloves and protective eyewear.",
+            "bee_safety": "Avoid spraying during flowering period."
+        },
+        "organic_approved": false,
+        "region_suitability": [
+            "India",
+            "USA"
+        ],
+        "severity_level": 3,
+        "notes": "Apply treatment immediately after detecting early symptoms."
+    }
+}
